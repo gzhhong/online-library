@@ -4,6 +4,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
+  console.log('just in the handler of api/client/books');
 
   try {
     const { nickName } = req.query;
@@ -37,6 +38,7 @@ export default async function handler(req, res) {
           }
         });
       } else {
+        console.log('create accessLog for new user', nickName);
         await prisma.accessLog.create({
           data: {
             nickName,
