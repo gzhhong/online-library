@@ -81,11 +81,11 @@ export default function Books() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {books.map(book => (
                         <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden p-4 flex items-center">
-                            <div className="flex-shrink-0">
+                            <div className="flex-shrink-0 w-[100px] h-[100px] flex items-center justify-center">
                                 <img 
                                     src={getFullUrl(book.coverPath)} 
                                     alt={book.title} 
-                                    className="w-[100px] h-[100px] object-contain rounded-lg"
+                                    className="max-w-full max-h-full object-contain rounded-lg"
                                 />
                             </div>
                             <div className="flex-1 ml-4 min-w-0">
