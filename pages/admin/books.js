@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Layout from '@/components/Layout';
 
 export default function Books() {
     const [books, setBooks] = useState([]);
@@ -17,7 +18,6 @@ export default function Books() {
             });
 
             if (res.ok) {
-                // 从列表中移除已删除的书籍
                 setBooks(books.filter(book => book.id !== id));
             } else {
                 const data = await res.json();
@@ -29,39 +29,15 @@ export default function Books() {
         }
     }
 
-    useEffect(() => {
-        fetchBooks();
-    }, []);
-
-    const fetchBooks = async () => {
+    async function handlePreview(pdfPath) {
         try {
-            const res = await fetch('/api/admin/books/list');
-            if (!res.ok) throw new Error('获取图书列表失败');
-            const data = await res.json();
-            setBooks(data);
-        } catch (error) {
-            console.error('获取图书列表失败:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handlePreview = async (pdfPath) => {
-        try {
-            // 获取文件内容，fetch会自动带上cookies（包括token）
-            const response = await fetch(`${window.location.origin}${pdfPath}`);
+            const response = await fetch(pdfPath);
             if (!response.ok) throw new Error('Failed to fetch PDF');
             
-            // 获取文件内容
             const blob = await response.blob();
-            
-            // 创建blob URL
             const url = window.URL.createObjectURL(blob);
-            
-            // 在新窗口打开
             window.open(url, '_blank');
             
-            // 清理blob URL
             setTimeout(() => {
                 window.URL.revokeObjectURL(url);
             }, 100);
@@ -69,29 +45,70 @@ export default function Books() {
             console.error('Error previewing PDF:', error);
             alert('无法预览PDF文件');
         }
-    };
+    }
+
+    useEffect(() => {
+        async function fetchBooks() {
+            try {
+                const res = await fetch('/api/admin/books/list');
+                if (!res.ok) throw new Error('获取图书列表失败');
+                const data = await res.json();
+                setBooks(data);
+            } catch (error) {
+                console.error('获取图书列表失败:', error);
+            }
+        }
+        fetchBooks();
+    }, []);
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">图书管理</h1>
-            <Link href="/admin/upload" className="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">
-                上传新书
-            </Link>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                {books.map(book => (
-                    <div key={book.id} className="border p-4 rounded">
-                        <img src={book.coverPath} alt={book.title} className="w-full h-48 object-cover mb-2"/>
-                        <h2 className="text-xl font-bold">{book.title}</h2>
-                        <p>访问级别：{book.accessLevel}</p>
-                        <button
-                            onClick={() => handleDelete(book.id)}
-                            className="bg-red-500 text-white px-4 py-2 rounded mt-2"
-                        >
-                            删除
-                        </button>
-                    </div>
-                ))}
+        <Layout>
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800">图书管理</h1>
+                    <Link 
+                        href="/admin/upload" 
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                        上传新书
+                    </Link>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {books.map(book => (
+                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div className="aspect-w-3 aspect-h-4">
+                                <img 
+                                    src={book.coverPath} 
+                                    alt={book.title} 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="p-4">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-2">{book.title}</h2>
+                                <p className="text-gray-600 mb-2">访问级别：{book.accessLevel}</p>
+                                <p className="text-gray-500 text-sm mb-4">
+                                    上传时间：{new Date(book.createdAt).toLocaleString()}
+                                </p>
+                                <div className="flex space-x-2">
+                                    <button
+                                        onClick={() => handlePreview(book.pdfPath)}
+                                        className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded transition-colors"
+                                    >
+                                        预览
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(book.id)}
+                                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded transition-colors"
+                                    >
+                                        删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
-        </div>
+        </Layout>
     );
 } 
