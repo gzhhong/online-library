@@ -69,7 +69,22 @@ export default async function handler(req, res) {
 
     // 获取并返回文件
     const result = await getFileFromCOS(cloudPath);
-    result.Body.pipe(res);
+
+    // 设置响应头
+    if (result.headers && result.headers['content-type']) {
+      res.setHeader('Content-Type', result.headers['content-type']);
+    }
+    if (result.headers && result.headers['content-length']) {
+      res.setHeader('Content-Length', result.headers['content-length']);
+    }
+
+    // 如果是二进制数据，直接发送
+    if (result.Body instanceof Buffer) {
+      res.send(result.Body);
+    } else {
+      // 如果是流，使用pipe
+      result.Body.pipe(res);
+    }
 
   } catch (error) {
     console.error('File access error:', error);
