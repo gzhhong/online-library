@@ -111,6 +111,9 @@ export default function Upload() {
                                 选择封面图片
                             </Button>
                         </label>
+                        <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5, display: 'block' }}>
+                            支持jpg、png格式，文件大小不超过50MB
+                        </Typography>
                         {cover && (
                             <Typography variant="body2" sx={{ mt: 1 }}>
                                 已选择: {cover.name}
@@ -136,6 +139,9 @@ export default function Upload() {
                                 选择PDF文件
                             </Button>
                         </label>
+                        <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5, display: 'block' }}>
+                            支持PDF格式，文件大小不超过50MB
+                        </Typography>
                         {pdf && (
                             <Typography variant="body2" sx={{ mt: 1 }}>
                                 已选择: {pdf.name}

@@ -29,6 +29,8 @@ export default async function handler(req, res) {
       uploadDir: path.join(process.cwd(), 'uploads'),
       keepExtensions: true,
       multiples: true,
+      maxFileSize: 50 * 1024 * 1024, // 50MB
+      maxFieldsSize: 50 * 1024 * 1024, // 50MB
     });
 
     const [fields, files] = await new Promise((resolve, reject) => {
