@@ -8,6 +8,7 @@ import { uploadToCOS } from '@/lib/cos';
 export const config = {
   api: {
     bodyParser: false,
+    responseLimit: '50mb',
   },
 };
 
@@ -31,11 +32,27 @@ export default async function handler(req, res) {
       multiples: true,
       maxFileSize: 50 * 1024 * 1024, // 50MB
       maxFieldsSize: 50 * 1024 * 1024, // 50MB
+      filter: function ({ name, originalFilename, mimetype }) {
+        // 验证文件类型
+        if (name === 'cover') {
+          return mimetype && mimetype.includes('image/');
+        }
+        if (name === 'pdf') {
+          return mimetype === 'application/pdf';
+        }
+        return false;
+      },
     });
 
     const [fields, files] = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
+        if (err) {
+          if (err.code === 'LIMIT_FILE_SIZE') {
+            reject(new Error('文件大小超过50MB限制'));
+          } else {
+            reject(err);
+          }
+        }
         resolve([fields, files]);
       });
     });

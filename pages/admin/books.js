@@ -80,15 +80,15 @@ export default function Books() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {books.map(book => (
-                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                            <div className="aspect-w-3 aspect-h-4">
+                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden p-4 flex items-center">
+                            <div className="flex-shrink-0">
                                 <img 
                                     src={getFullUrl(book.coverPath)} 
                                     alt={book.title} 
-                                    className="w-full h-full object-cover"
+                                    className="w-[100px] h-[100px] object-cover rounded-lg"
                                 />
                             </div>
-                            <div className="p-4">
+                            <div className="flex-1 ml-4">
                                 <h2 className="text-xl font-semibold text-gray-800 mb-2">{book.title}</h2>
                                 <p className="text-gray-600 mb-2">访问级别：{book.accessLevel}</p>
                                 <p className="text-gray-500 text-sm mb-4">
