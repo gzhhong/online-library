@@ -8,7 +8,7 @@ export default function Books() {
     const router = useRouter();
 
     function getFullUrl(path) {
-        return `${window.location.origin}${path}`;
+        return `${window.location.origin}/api/files${path}`;
     }
 
     async function handleDelete(id) {

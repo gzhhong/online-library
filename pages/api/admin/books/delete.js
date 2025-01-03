@@ -29,8 +29,8 @@ export default async function handler(req, res) {
     }
 
     // 从COS删除文件
-    const coverPath = book.coverPath.replace('/files', '');
-    const pdfPath = book.pdfPath.replace('/files', '');
+    const coverPath = book.coverPath;
+    const pdfPath = book.pdfPath;
     
     await deleteFromCOS(coverPath);
     await deleteFromCOS(pdfPath);

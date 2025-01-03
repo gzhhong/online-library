@@ -1,7 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // 配置API路由前缀
+  images: {
+    domains: [
+      'online-library-133937-9-1334202186.sh.run.tcloudbase.com'
+    ]
+  },
   async rewrites() {
     return [
       {
