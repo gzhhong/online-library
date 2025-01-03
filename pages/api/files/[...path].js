@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const token = req.cookies.token;
     const isAdmin = token && verifyToken(token);
 
-    const fileUrlPath = '/files/' + path.join('/');
+    const fileUrlPath = '/' + path.join('/');
 
     // 查找对应的图书记录
     const book = await prisma.book.findFirst({
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
     }
 
     // 构造COS中的文件路径
-    const cloudPath = fileUrlPath.replace('/files', '');
+    const cloudPath = fileUrlPath;
 
     // 设置Content-Type
     const ext = path[path.length - 1].split('.').pop().toLowerCase();

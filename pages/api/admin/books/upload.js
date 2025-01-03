@@ -55,8 +55,8 @@ export default async function handler(req, res) {
       data: {
         title: fields.title[0],
         accessLevel: parseInt(fields.accessLevel[0]),
-        coverPath: `/files${coverCloudPath}`,
-        pdfPath: `/files${pdfCloudPath}`,
+        coverPath: coverCloudPath,
+        pdfPath: pdfCloudPath,
       }
     });
 
