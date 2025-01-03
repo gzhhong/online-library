@@ -7,6 +7,10 @@ export default function Books() {
     const [books, setBooks] = useState([]);
     const router = useRouter();
 
+    function getFullUrl(path) {
+        return `${window.location.origin}${path}`;
+    }
+
     async function handleDelete(id) {
         if (!confirm('确定要删除这本书吗？')) {
             return;
@@ -31,7 +35,7 @@ export default function Books() {
 
     async function handlePreview(pdfPath) {
         try {
-            const response = await fetch(pdfPath);
+            const response = await fetch(getFullUrl(pdfPath));
             if (!response.ok) throw new Error('Failed to fetch PDF');
             
             const blob = await response.blob();
@@ -79,7 +83,7 @@ export default function Books() {
                         <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                             <div className="aspect-w-3 aspect-h-4">
                                 <img 
-                                    src={book.coverPath} 
+                                    src={getFullUrl(book.coverPath)} 
                                     alt={book.title} 
                                     className="w-full h-full object-cover"
                                 />
