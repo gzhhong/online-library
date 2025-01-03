@@ -1,7 +1,24 @@
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import prisma from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
+import { cosConfig, initCOS } from '@/lib/cos';
+
+// 从COS获取文件
+async function getFileFromCOS(cos, cloudPath) {
+  return new Promise((resolve, reject) => {
+    cos.getObject({
+      Bucket: cosConfig.Bucket,
+      Region: cosConfig.Region,
+      Key: cloudPath,
+      Output: process.stdout
+    }, function(err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
 
 export default async function handler(req, res) {
   const { path, nickName } = req.query;
@@ -14,9 +31,6 @@ export default async function handler(req, res) {
     const token = req.cookies.token;
     const isAdmin = token && verifyToken(token);
 
-    // 获取文件路径
-    const filePath = join(process.cwd(), 'uploads', ...path);
-    
     // 从路径构造文件的URL路径
     const fileUrlPath = '/files/' + path.join('/');
 
@@ -34,55 +48,35 @@ export default async function handler(req, res) {
       return res.status(404).json({ message: 'File not found in database' });
     }
 
-    // 如果是管理员，直接允许访问
-    if (isAdmin) {
-      const stream = createReadStream(filePath);
-      stream.on('error', () => {
-        res.status(404).json({ message: 'File not found on disk' });
-      });
-
-      const ext = path[path.length - 1].split('.').pop().toLowerCase();
-      const contentTypes = {
-        'pdf': 'application/pdf',
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-        'png': 'image/png',
-        'gif': 'image/gif'
-      };
-      
-      if (contentTypes[ext]) {
-        res.setHeader('Content-Type', contentTypes[ext]);
+    // 如果不是管理员，才检查用户权限
+    if (!isAdmin) {
+      let userAccessLevel = 0;
+      if (nickName) {
+        const user = await prisma.user.findUnique({
+          where: { nickName }
+        });
+        if (user) {
+          userAccessLevel = user.accessLevel;
+        }
       }
 
-      return stream.pipe(res);
-    }
-
-    // 非管理员，检查用户权限
-    let userAccessLevel = 0;
-    if (nickName) {
-      const user = await prisma.user.findUnique({
-        where: { nickName }
-      });
-      if (user) {
-        userAccessLevel = user.accessLevel;
+      // 验证访问权限
+      if (userAccessLevel < book.accessLevel) {
+        return res.status(403).json({ 
+          message: 'Insufficient access level',
+          required: book.accessLevel,
+          current: userAccessLevel
+        });
       }
     }
 
-    // 验证访问权限
-    if (userAccessLevel < book.accessLevel) {
-      return res.status(403).json({ 
-        message: 'Insufficient access level',
-        required: book.accessLevel,
-        current: userAccessLevel
-      });
-    }
+    // 到这里，要么是管理员，要么是有权限的用户，都可以访问文件
+    const cos = await initCOS();
 
-    // 权限验证通过，返回文件
-    const stream = createReadStream(filePath);
-    stream.on('error', () => {
-      res.status(404).json({ message: 'File not found on disk' });
-    });
+    // 构造COS中的文件路径（移除/files前缀）
+    const cloudPath = fileUrlPath.replace('/files', '');
 
+    // 设置适当的Content-Type
     const ext = path[path.length - 1].split('.').pop().toLowerCase();
     const contentTypes = {
       'pdf': 'application/pdf',
@@ -96,7 +90,10 @@ export default async function handler(req, res) {
       res.setHeader('Content-Type', contentTypes[ext]);
     }
 
-    stream.pipe(res);
+    // 从COS获取文件并返回
+    const result = await getFileFromCOS(cos, cloudPath);
+    result.Body.pipe(res);
+
   } catch (error) {
     console.error('File access error:', error);
     res.status(500).json({ message: 'Internal server error' });

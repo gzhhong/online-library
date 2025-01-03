@@ -10,6 +10,7 @@ services:
       - JWT_SECRET=your_jwt_secret_key
       - ADMIN_EMAIL=admin@example.com
       - ADMIN_PASSWORD=your_secure_password
+      - COS_BUCKET=7072-prod-3g4rk3mo73bf5570-1334202186
     volumes:
       - ./uploads:/app/uploads:rw
     depends_on:
