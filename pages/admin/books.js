@@ -1,10 +1,33 @@
 import { useState, useEffect } from 'react';
-import { Grid, Card, CardMedia, CardContent, Typography, CardActions, Button } from '@mui/material';
-import Layout from '@/components/Layout';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Books() {
     const [books, setBooks] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
+    async function handleDelete(id) {
+        if (!confirm('确定要删除这本书吗？')) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/admin/books/delete?id=${id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                // 从列表中移除已删除的书籍
+                setBooks(books.filter(book => book.id !== id));
+            } else {
+                const data = await res.json();
+                alert(data.message || '删除失败');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('删除失败');
+        }
+    }
 
     useEffect(() => {
         fetchBooks();
@@ -49,41 +72,26 @@ export default function Books() {
     };
 
     return (
-        <Layout>
-            <Grid container spacing={3}>
-                {books.map((book) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={book._id}>
-                        <Card>
-                            <CardMedia
-                                component="img"
-                                height="200"
-                                image={`${window.location.origin}${book.coverPath}`}
-                                alt={book.title}
-                                sx={{ objectFit: 'contain' }}
-                            />
-                            <CardContent>
-                                <Typography gutterBottom variant="h6" component="div">
-                                    {book.title}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    访问权限: {book.accessLevel}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    上传时间: {new Date(book.createdAt).toLocaleString()}
-                                </Typography>
-                            </CardContent>
-                            <CardActions>
-                                <Button 
-                                    size="small" 
-                                    onClick={() => handlePreview(book.pdfPath)}
-                                >
-                                    预览PDF
-                                </Button>
-                            </CardActions>
-                        </Card>
-                    </Grid>
+        <div className="container mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-4">图书管理</h1>
+            <Link href="/admin/upload" className="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">
+                上传新书
+            </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                {books.map(book => (
+                    <div key={book.id} className="border p-4 rounded">
+                        <img src={book.coverPath} alt={book.title} className="w-full h-48 object-cover mb-2"/>
+                        <h2 className="text-xl font-bold">{book.title}</h2>
+                        <p>访问级别：{book.accessLevel}</p>
+                        <button
+                            onClick={() => handleDelete(book.id)}
+                            className="bg-red-500 text-white px-4 py-2 rounded mt-2"
+                        >
+                            删除
+                        </button>
+                    </div>
                 ))}
-            </Grid>
-        </Layout>
+            </div>
+        </div>
     );
 } 
