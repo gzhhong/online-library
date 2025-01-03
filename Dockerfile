@@ -23,16 +23,22 @@ RUN npm run build
 FROM node:18-alpine AS runner
 
 # 创建app用户/组
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs --ingroup nodejs
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs --ingroup nodejs
 
 WORKDIR /app
 
-# 创建必要的目录并设置权限
-RUN mkdir -p uploads public && chown nextjs:nodejs uploads public
+# 创建所有必要的目录并设置权限
+RUN mkdir -p uploads public && \
+    mkdir -p /tmp/npm && \
+    chmod -R 777 /tmp/npm && \
+    chown -R nextjs:nodejs /app && \
+    chown -R nextjs:nodejs /home/nextjs && \
+    chown -R nextjs:nodejs /tmp/npm
 
 # 设置环境变量
 ENV NODE_ENV=production
+ENV npm_config_cache=/tmp/npm
 
 # 从构建阶段复制必要文件
 COPY --from=builder /app/package*.json ./
@@ -47,11 +53,13 @@ RUN chown -R nextjs:nodejs .
 USER nextjs
 
 # 只安装生产依赖
-RUN npm install --production
+RUN npm install --omit=dev --force
+
+# 生成Prisma客户端
 RUN npx prisma generate
 
 # 暴露端口
 EXPOSE 3000
 
 # 启动命令
-CMD ["npm", "start"] 
+CMD ["npm", "start"]
