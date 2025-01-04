@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { Grid, Card, CardMedia, CardContent, Typography, CardActions, Button } from '@mui/material';
 import Layout from '@/components/Layout';
 
 export default function Books() {
@@ -78,32 +79,51 @@ export default function Books() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Grid container spacing={3}>
                     {books.map(book => (
-                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden p-4 flex flex-col max-w-[300px]">
-                            <div className="w-full pb-[100%] relative">
-                                <img 
-                                    src={getFullUrl(book.coverPath)} 
-                                    alt={book.title} 
-                                    className="absolute inset-0 w-full h-full object-contain rounded-lg bg-gray-50"
+                        <Grid item xs={6} md={3} key={book.id}>
+                            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                <CardMedia
+                                    component="img"
+                                    sx={{ 
+                                        height: 200, 
+                                        objectFit: 'contain',
+                                        bgcolor: 'grey.50'
+                                    }}
+                                    image={getFullUrl(book.coverPath)}
+                                    alt={book.title}
                                 />
-                            </div>
-                            <div className="mt-4">
-                                <h2 className="text-base font-semibold text-gray-800 mb-2 truncate">{book.title}</h2>
-                                <p className="text-gray-600 text-sm mb-1">访问级别：{book.accessLevel}</p>
-                                <div className="flex justify-between items-center text-xs text-gray-500">
-                                    <span>{new Date(book.createdAt).toLocaleString()}</span>
-                                    <button
+                                <CardContent sx={{ flexGrow: 1 }}>
+                                    <Typography gutterBottom variant="subtitle1" component="div" noWrap>
+                                        {book.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        访问级别：{book.accessLevel}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary" display="block">
+                                        {new Date(book.createdAt).toLocaleString()}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions sx={{ justifyContent: 'flex-end' }}>
+                                    <Button
+                                        size="small"
+                                        color="primary"
+                                        onClick={() => handlePreview(book.pdfPath)}
+                                    >
+                                        预览
+                                    </Button>
+                                    <Button 
+                                        size="small" 
+                                        color="error"
                                         onClick={() => handleDelete(book.id)}
-                                        className="text-red-500 hover:text-red-600 transition-colors"
                                     >
                                         删除
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        </Grid>
                     ))}
-                </div>
+                </Grid>
             </div>
         </Layout>
     );
