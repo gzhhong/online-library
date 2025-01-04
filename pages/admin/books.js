@@ -80,24 +80,22 @@ export default function Books() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {books.map(book => (
-                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden p-4 flex flex-col">
+                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden p-4 flex flex-col max-w-[300px]">
                             <div className="w-full pb-[100%] relative">
                                 <img 
                                     src={getFullUrl(book.coverPath)} 
                                     alt={book.title} 
-                                    className="absolute inset-0 w-full h-full object-contain rounded-lg"
+                                    className="absolute inset-0 w-full h-full object-contain rounded-lg bg-gray-50"
                                 />
                             </div>
                             <div className="mt-4">
                                 <h2 className="text-base font-semibold text-gray-800 mb-2 truncate">{book.title}</h2>
                                 <p className="text-gray-600 text-sm mb-1">访问级别：{book.accessLevel}</p>
-                                <p className="text-gray-500 text-xs mb-4">
-                                    上传时间：{new Date(book.createdAt).toLocaleString()}
-                                </p>
-                                <div className="flex justify-end">
+                                <div className="flex justify-between items-center text-xs text-gray-500">
+                                    <span>{new Date(book.createdAt).toLocaleString()}</span>
                                     <button
                                         onClick={() => handleDelete(book.id)}
-                                        className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm transition-colors"
+                                        className="text-red-500 hover:text-red-600 transition-colors"
                                     >
                                         删除
                                     </button>
