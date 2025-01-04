@@ -13,6 +13,7 @@ export default async function handler(req, res) {
     const token = req.cookies.token;
     const isAdmin = token && verifyToken(token);
 
+    // 构造文件路径
     const fileUrlPath = '/' + path.join('/');
 
     // 查找对应的图书记录
@@ -50,7 +51,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 构造COS中的文件路径
+    // 构造 COS 中的文件路径
     const cloudPath = fileUrlPath;
 
     // 设置Content-Type
@@ -71,7 +72,11 @@ export default async function handler(req, res) {
     await streamFileToResponse(cloudPath, res);
 
   } catch (error) {
-    console.error('File access error:', error);
+    console.error('File access error:', {
+      error,
+      path: req.query.path,
+      url: req.url
+    });
     res.status(500).json({ message: 'Internal server error' });
   }
 } 

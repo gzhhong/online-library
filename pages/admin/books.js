@@ -78,29 +78,23 @@ export default function Books() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {books.map(book => (
-                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden p-4 flex items-center">
-                            <div className="flex-shrink-0 w-[100px] h-[100px] flex items-center justify-center">
+                        <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden p-4 flex flex-col">
+                            <div className="w-full pb-[100%] relative">
                                 <img 
                                     src={getFullUrl(book.coverPath)} 
                                     alt={book.title} 
-                                    className="max-w-full max-h-full object-contain rounded-lg"
+                                    className="absolute inset-0 w-full h-full object-contain rounded-lg"
                                 />
                             </div>
-                            <div className="flex-1 ml-4 min-w-0">
-                                <h2 className="text-lg font-semibold text-gray-800 mb-2 truncate">{book.title}</h2>
-                                <p className="text-gray-600 mb-2">访问级别：{book.accessLevel}</p>
-                                <p className="text-gray-500 text-sm mb-4">
+                            <div className="mt-4">
+                                <h2 className="text-base font-semibold text-gray-800 mb-2 truncate">{book.title}</h2>
+                                <p className="text-gray-600 text-sm mb-1">访问级别：{book.accessLevel}</p>
+                                <p className="text-gray-500 text-xs mb-4">
                                     上传时间：{new Date(book.createdAt).toLocaleString()}
                                 </p>
-                                <div className="flex space-x-2">
-                                    <button
-                                        onClick={() => handlePreview(book.pdfPath)}
-                                        className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm transition-colors"
-                                    >
-                                        预览
-                                    </button>
+                                <div className="flex justify-end">
                                     <button
                                         onClick={() => handleDelete(book.id)}
                                         className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm transition-colors"
