@@ -1,5 +1,5 @@
 import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
-import { LibraryBooks, CloudUpload, People, Logout } from '@mui/icons-material';
+import { LibraryBooks, CloudUpload, People, History, Logout } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
@@ -12,7 +12,8 @@ export default function Layout({ children }) {
     const menuItems = [
         { text: '图书浏览', icon: <LibraryBooks />, path: '/admin/books' },
         { text: '图书上传', icon: <CloudUpload />, path: '/admin/upload' },
-        { text: '用户管理', icon: <People />, path: '/admin/users' }
+        { text: '用户管理', icon: <People />, path: '/admin/users' },
+        { text: '访客记录', icon: <History />, path: '/admin/guests' }
     ];
 
     const handleLogout = async () => {
