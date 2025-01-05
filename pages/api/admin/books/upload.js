@@ -8,7 +8,7 @@ import { uploadToCOS } from '@/lib/cos';
 export const config = {
   api: {
     bodyParser: false,
-    responseLimit: '50mb',
+    responseLimit: '30mb',
   },
 };
 
@@ -30,8 +30,8 @@ export default async function handler(req, res) {
       uploadDir: path.join(process.cwd(), 'uploads'),
       keepExtensions: true,
       multiples: true,
-      maxFileSize: 50 * 1024 * 1024, // 50MB
-      maxFieldsSize: 50 * 1024 * 1024, // 50MB
+      maxFileSize: 30 * 1024 * 1024, // 30MB
+      maxFieldsSize: 30 * 1024 * 1024, // 30MB
       filter: function ({ name, originalFilename, mimetype }) {
         // 验证文件类型
         if (name === 'cover') {
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       form.parse(req, (err, fields, files) => {
         if (err) {
           if (err.code === 'LIMIT_FILE_SIZE') {
-            reject(new Error('文件大小超过50MB限制'));
+            reject(new Error('文件大小超过30MB限制'));
           } else {
             reject(err);
           }

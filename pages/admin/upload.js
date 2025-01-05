@@ -112,7 +112,7 @@ export default function Upload() {
                             </Button>
                         </label>
                         <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5, display: 'block' }}>
-                            支持jpg、png格式，文件大小不超过50MB
+                            支持jpg、png格式，文件大小不超过30MB
                         </Typography>
                         {cover && (
                             <Typography variant="body2" sx={{ mt: 1 }}>
@@ -140,7 +140,7 @@ export default function Upload() {
                             </Button>
                         </label>
                         <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5, display: 'block' }}>
-                            支持PDF格式，文件大小不超过50MB
+                            支持PDF格式，文件大小不超过30MB
                         </Typography>
                         {pdf && (
                             <Typography variant="body2" sx={{ mt: 1 }}>
