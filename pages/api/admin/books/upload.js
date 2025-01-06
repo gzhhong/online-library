@@ -31,7 +31,6 @@ export default async function handler(req, res) {
       keepExtensions: true,
       multiples: true,
       maxFileSize: 30 * 1024 * 1024, // 30MB
-      maxFieldsSize: 30 * 1024 * 1024, // 30MB
       filter: function ({ name, originalFilename, mimetype }) {
         // 验证文件类型
         if (name === 'cover') {

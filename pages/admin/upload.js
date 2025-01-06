@@ -22,6 +22,28 @@ export default function Upload() {
     const [status, setStatus] = useState({ type: '', message: '' });
     const [loading, setLoading] = useState(false);
 
+    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB in bytes
+
+    const handleFileChange = (e, type) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > MAX_FILE_SIZE) {
+                setStatus({
+                    type: 'error',
+                    message: `${type === 'cover' ? '封面图片' : 'PDF文件'}大小超过30MB限制`
+                });
+                e.target.value = ''; // 清空文件输入
+                return;
+            }
+            if (type === 'cover') {
+                setCover(file);
+            } else {
+                setPdf(file);
+            }
+            setStatus({ type: '', message: '' });
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -97,7 +119,7 @@ export default function Upload() {
                             accept="image/*"
                             type="file"
                             id="cover-file"
-                            onChange={(e) => setCover(e.target.files[0])}
+                            onChange={(e) => handleFileChange(e, 'cover')}
                             style={{ display: 'none' }}
                             disabled={loading}
                         />
@@ -125,7 +147,7 @@ export default function Upload() {
                             accept="application/pdf"
                             type="file"
                             id="pdf-file"
-                            onChange={(e) => setPdf(e.target.files[0])}
+                            onChange={(e) => handleFileChange(e, 'pdf')}
                             style={{ display: 'none' }}
                             disabled={loading}
                         />
