@@ -17,11 +17,16 @@ export default async function handler(req, res) {
     }
 
     const { title, accessLevel, coverPath, pdfPath } = req.body;
-    console.log('Creating book record:', {
-      title,
-      accessLevel,
-      coverPath,
-      pdfPath
+
+    // 确保路径以'/'开头，以符合文件服务的要求
+    const normalizedCoverPath = coverPath.startsWith('/') ? coverPath : `/${coverPath}`;
+    const normalizedPdfPath = pdfPath.startsWith('/') ? pdfPath : `/${pdfPath}`;
+
+    console.log('Normalized paths:', {
+      originalCoverPath: coverPath,
+      originalPdfPath: pdfPath,
+      normalizedCoverPath,
+      normalizedPdfPath
     });
 
     // 创建书籍记录
@@ -29,8 +34,8 @@ export default async function handler(req, res) {
       data: {
         title,
         accessLevel: parseInt(accessLevel),
-        coverPath,
-        pdfPath,
+        coverPath: normalizedCoverPath,  // 存入数据库的路径需要以'/'开头
+        pdfPath: normalizedPdfPath,      // 存入数据库的路径需要以'/'开头
       }
     });
 

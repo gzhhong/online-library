@@ -49,17 +49,10 @@ export default function Upload() {
         setLoading(true);
         setStatus({ type: '', message: '' });
 
-        console.log('Starting upload process:', {
-            title,
-            accessLevel,
-            coverFileName: cover?.name,
-            pdfFileName: pdf?.name
-        });
-
         try {
-            // 处理封面图片上传
+            // 处理封面图片上传，路径不能以'/'开头，否则会报错-501007
+            // 但是存入数据库时，路径需要以'/'开头，文件路径链接不正确
             const coverPath = `covers/${Date.now()}-${cover.name}`;
-            console.log('Requesting cover upload URL for path:', coverPath);
             
             const coverUploadRes = await fetch('/api/admin/books/upload', {
                 method: 'POST',
@@ -81,23 +74,17 @@ export default function Upload() {
             coverFormData.append('x-cos-meta-fileid', coverUploadData.cos_file_id);
             coverFormData.append('file', cover);
 
-            console.log('Uploading cover to COS...');
             const coverCosRes = await fetch(coverUploadData.url, {
                 method: 'POST',
                 body: coverFormData,
             });
 
-            console.log('Cover upload response:', {
-                status: coverCosRes.status,
-                statusText: coverCosRes.statusText
-            });
-
             if (!coverCosRes.ok) throw new Error('封面上传失败');
             console.log('Cover upload successful');
 
-            // 处理PDF文件上传
+            // 处理PDF文件上传，路径不能以'/'开头，否则会报错-501007
+            // 但是存入数据库时，路径需要以'/'开头，文件路径链接不正确
             const pdfPath = `pdfs/${Date.now()}-${pdf.name}`;
-            console.log('Requesting PDF upload URL for path:', pdfPath);
 
             const pdfUploadRes = await fetch('/api/admin/books/upload', {
                 method: 'POST',
@@ -119,22 +106,14 @@ export default function Upload() {
             pdfFormData.append('x-cos-meta-fileid', pdfUploadData.cos_file_id);
             pdfFormData.append('file', pdf);
 
-            console.log('Uploading PDF to COS...');
             const pdfCosRes = await fetch(pdfUploadData.url, {
                 method: 'POST',
                 body: pdfFormData,
             });
 
-            console.log('PDF upload response:', {
-                status: pdfCosRes.status,
-                statusText: pdfCosRes.statusText,
-                url: pdfUploadData.url
-            });
-
             if (!pdfCosRes.ok) throw new Error('PDF上传失败');
             console.log('PDF upload successful, proceeding to create book record');
 
-            console.log('Creating book record with paths:', { coverPath, pdfPath });
             const res = await fetch('/api/admin/books/uploadSuccess', {
                 method: 'POST',
                 headers: {
