@@ -58,7 +58,7 @@ export default function Upload() {
 
         try {
             // 处理封面图片上传
-            const coverPath = `/covers/${Date.now()}-${cover.name}`;
+            const coverPath = `covers/${Date.now()}-${cover.name}`;
             console.log('Requesting cover upload URL for path:', coverPath);
             
             const coverUploadRes = await fetch('/api/admin/books/upload', {
@@ -96,7 +96,7 @@ export default function Upload() {
             console.log('Cover upload successful');
 
             // 处理PDF文件上传
-            const pdfPath = `/pdfs/${Date.now()}-${pdf.name}`;
+            const pdfPath = `pdfs/${Date.now()}-${pdf.name}`;
             console.log('Requesting PDF upload URL for path:', pdfPath);
 
             const pdfUploadRes = await fetch('/api/admin/books/upload', {
