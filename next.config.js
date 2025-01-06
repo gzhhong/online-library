@@ -18,14 +18,6 @@ const nextConfig = {
       }
     ];
   },
-  api: {
-    bodyParser: {
-      sizeLimit: '30mb'
-    },
-    responseLimit: {
-      size: '30mb'
-    }
-  }
 }
 
 module.exports = nextConfig 
