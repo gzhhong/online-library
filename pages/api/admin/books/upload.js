@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       data: {
-        env: process.env.TENCENTCLOUD_RUNENV,
+        env: process.env.CLOUD_ENV_ID,
         path: path
       }
     });
