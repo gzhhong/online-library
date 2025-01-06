@@ -49,9 +49,18 @@ export default function Upload() {
         setLoading(true);
         setStatus({ type: '', message: '' });
 
+        console.log('Starting upload process:', {
+            title,
+            accessLevel,
+            coverFileName: cover?.name,
+            pdfFileName: pdf?.name
+        });
+
         try {
             // 处理封面图片上传
-            const coverPath = `covers/${Date.now()}-${cover.name}`;
+            const coverPath = `/covers/${Date.now()}-${cover.name}`;
+            console.log('Requesting cover upload URL for path:', coverPath);
+            
             const coverUploadRes = await fetch('/api/admin/books/upload', {
                 method: 'POST',
                 headers: {
@@ -62,6 +71,7 @@ export default function Upload() {
             
             if (!coverUploadRes.ok) throw new Error('获取封面上传链接失败');
             const coverUploadData = await coverUploadRes.json();
+            console.log('Got cover upload URL:', coverUploadData.url);
 
             // 上传封面到COS
             const coverFormData = new FormData();
@@ -71,15 +81,24 @@ export default function Upload() {
             coverFormData.append('x-cos-meta-fileid', coverUploadData.cos_file_id);
             coverFormData.append('file', cover);
 
+            console.log('Uploading cover to COS...');
             const coverCosRes = await fetch(coverUploadData.url, {
                 method: 'POST',
                 body: coverFormData,
             });
 
+            console.log('Cover upload response:', {
+                status: coverCosRes.status,
+                statusText: coverCosRes.statusText
+            });
+
             if (!coverCosRes.ok) throw new Error('封面上传失败');
+            console.log('Cover upload successful');
 
             // 处理PDF文件上传
-            const pdfPath = `pdfs/${Date.now()}-${pdf.name}`;
+            const pdfPath = `/pdfs/${Date.now()}-${pdf.name}`;
+            console.log('Requesting PDF upload URL for path:', pdfPath);
+
             const pdfUploadRes = await fetch('/api/admin/books/upload', {
                 method: 'POST',
                 headers: {
@@ -90,6 +109,7 @@ export default function Upload() {
 
             if (!pdfUploadRes.ok) throw new Error('获取PDF上传链接失败');
             const pdfUploadData = await pdfUploadRes.json();
+            console.log('Got PDF upload URL:', pdfUploadData.url);
 
             // 上传PDF到COS
             const pdfFormData = new FormData();
@@ -99,13 +119,22 @@ export default function Upload() {
             pdfFormData.append('x-cos-meta-fileid', pdfUploadData.cos_file_id);
             pdfFormData.append('file', pdf);
 
+            console.log('Uploading PDF to COS...');
             const pdfCosRes = await fetch(pdfUploadData.url, {
                 method: 'POST',
                 body: pdfFormData,
             });
 
-            if (!pdfCosRes.ok) throw new Error('PDF上传失败');
+            console.log('PDF upload response:', {
+                status: pdfCosRes.status,
+                statusText: pdfCosRes.statusText,
+                url: pdfUploadData.url
+            });
 
+            if (!pdfCosRes.ok) throw new Error('PDF上传失败');
+            console.log('PDF upload successful, proceeding to create book record');
+
+            console.log('Creating book record with paths:', { coverPath, pdfPath });
             const res = await fetch('/api/admin/books/uploadSuccess', {
                 method: 'POST',
                 headers: {
@@ -124,15 +153,21 @@ export default function Upload() {
                 throw new Error(error.message || '上传失败');
             }
 
+            console.log('Book record created successfully');
             setStatus({ type: 'success', message: '图书上传成功！' });
             setTitle('');
             setAccessLevel(0);
             setCover(null);
             setPdf(null);
         } catch (error) {
+            console.error('Upload process failed:', {
+                error: error.message,
+                stack: error.stack
+            });
             setStatus({ type: 'error', message: error.message });
         } finally {
             setLoading(false);
+            console.log('Upload process completed');
         }
     };
 
