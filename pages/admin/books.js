@@ -10,18 +10,38 @@ import {
     CardActions, 
     Button,
     Box,
-    CircularProgress 
+    CircularProgress,
+    TextField,
+    InputAdornment
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import Layout from '@/components/Layout';
 
 export default function Books() {
     const [books, setBooks] = useState([]);
+    const [allBooks, setAllBooks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchText, setSearchText] = useState('');
     const router = useRouter();
 
     function getFullUrl(path) {
         return `${window.location.origin}/api/files${path}`;
     }
+
+    const handleSearch = (event) => {
+        const value = event.target.value;
+        setSearchText(value);
+        
+        if (value.length >= 3 || /[\u4e00-\u9fa5]{2,}/.test(value)) {
+            const searchValue = value.trim().toLowerCase();
+            const filtered = allBooks.filter(book => 
+                book.title.toLowerCase().includes(searchValue)
+            );
+            setBooks(filtered);
+        } else if (!value) {
+            setBooks(allBooks);
+        }
+    };
 
     async function handleDelete(id) {
         if (!confirm('确定要删除这本书吗？')) {
@@ -70,6 +90,7 @@ export default function Books() {
                 if (!res.ok) throw new Error('获取图书列表失败');
                 const data = await res.json();
                 setBooks(data);
+                setAllBooks(data);
             } catch (error) {
                 console.error('获取图书列表失败:', error);
             } finally {
@@ -83,7 +104,30 @@ export default function Books() {
         <Layout>
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">图书管理</h1>
+                    <div className="flex items-center flex-1">
+                        <h1 className="text-3xl font-bold text-gray-800 mr-4">图书管理</h1>
+                        <TextField
+                            size="small"
+                            placeholder="搜索图书..."
+                            value={searchText}
+                            onChange={handleSearch}
+                            sx={{ 
+                                width: 300,
+                                ml: 'auto',
+                                mr: 2,
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'white'
+                                }
+                            }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon color="action" />
+                                    </InputAdornment>
+                                )
+                            }}
+                        />
+                    </div>
                     <Link 
                         href="/admin/upload" 
                         className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
