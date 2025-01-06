@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Grid, Card, CardMedia, CardContent, Typography, CardActions, Button } from '@mui/material';
+import { 
+    Grid, 
+    Card, 
+    CardMedia, 
+    CardContent, 
+    Typography, 
+    CardActions, 
+    Button,
+    Box,
+    CircularProgress 
+} from '@mui/material';
 import Layout from '@/components/Layout';
 
 export default function Books() {
     const [books, setBooks] = useState([]);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     function getFullUrl(path) {
@@ -61,6 +72,8 @@ export default function Books() {
                 setBooks(data);
             } catch (error) {
                 console.error('获取图书列表失败:', error);
+            } finally {
+                setLoading(false);
             }
         }
         fetchBooks();
@@ -79,51 +92,62 @@ export default function Books() {
                     </Link>
                 </div>
 
-                <Grid container spacing={3}>
-                    {books.map(book => (
-                        <Grid item xs={6} md={3} key={book.id}>
-                            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                <CardMedia
-                                    component="img"
-                                    sx={{ 
-                                        height: 200, 
-                                        objectFit: 'contain',
-                                        bgcolor: 'grey.50'
-                                    }}
-                                    image={getFullUrl(book.coverPath)}
-                                    alt={book.title}
-                                />
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Typography gutterBottom variant="subtitle1" component="div" noWrap>
-                                        {book.title}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        访问级别：{book.accessLevel}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary" display="block">
-                                        {new Date(book.createdAt).toLocaleString()}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions sx={{ justifyContent: 'flex-end' }}>
-                                    <Button
-                                        size="small"
-                                        color="primary"
-                                        onClick={() => handlePreview(book.pdfPath)}
-                                    >
-                                        预览
-                                    </Button>
-                                    <Button 
-                                        size="small" 
-                                        color="error"
-                                        onClick={() => handleDelete(book.id)}
-                                    >
-                                        删除
-                                    </Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+                {loading ? (
+                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                        <Box sx={{ textAlign: 'center' }}>
+                            <CircularProgress sx={{ mb: 2 }} />
+                            <Typography color="text.secondary">
+                                正在获取图书列表...
+                            </Typography>
+                        </Box>
+                    </Box>
+                ) : (
+                    <Grid container spacing={3}>
+                        {books.map(book => (
+                            <Grid item xs={6} md={3} key={book.id}>
+                                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    <CardMedia
+                                        component="img"
+                                        sx={{ 
+                                            height: 200, 
+                                            objectFit: 'contain',
+                                            bgcolor: 'grey.50'
+                                        }}
+                                        image={getFullUrl(book.coverPath)}
+                                        alt={book.title}
+                                    />
+                                    <CardContent sx={{ flexGrow: 1 }}>
+                                        <Typography gutterBottom variant="subtitle1" component="div" noWrap>
+                                            {book.title}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            访问级别：{book.accessLevel}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" display="block">
+                                            {new Date(book.createdAt).toLocaleString()}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions sx={{ justifyContent: 'flex-end' }}>
+                                        <Button
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => handlePreview(book.pdfPath)}
+                                        >
+                                            预览
+                                        </Button>
+                                        <Button 
+                                            size="small" 
+                                            color="error"
+                                            onClick={() => handleDelete(book.id)}
+                                        >
+                                            删除
+                                        </Button>
+                                    </CardActions>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                )}
             </div>
         </Layout>
     );
