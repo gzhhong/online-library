@@ -50,15 +50,73 @@ export default function Upload() {
         setStatus({ type: '', message: '' });
 
         try {
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('accessLevel', accessLevel);
-            formData.append('cover', cover);
-            formData.append('pdf', pdf);
-
-            const res = await fetch('/api/admin/books/upload', {
+            // 处理封面图片上传
+            const coverPath = `covers/${Date.now()}-${cover.name}`;
+            const coverUploadRes = await fetch('/api/admin/books/upload', {
                 method: 'POST',
-                body: formData,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ path: coverPath }),
+            });
+            
+            if (!coverUploadRes.ok) throw new Error('获取封面上传链接失败');
+            const coverUploadData = await coverUploadRes.json();
+
+            // 上传封面到COS
+            const coverFormData = new FormData();
+            coverFormData.append('key', coverPath);
+            coverFormData.append('Signature', coverUploadData.authorization);
+            coverFormData.append('x-cos-security-token', coverUploadData.token);
+            coverFormData.append('x-cos-meta-fileid', coverUploadData.cos_file_id);
+            coverFormData.append('file', cover);
+
+            const coverCosRes = await fetch(coverUploadData.url, {
+                method: 'POST',
+                body: coverFormData,
+            });
+
+            if (!coverCosRes.ok) throw new Error('封面上传失败');
+
+            // 处理PDF文件上传
+            const pdfPath = `pdfs/${Date.now()}-${pdf.name}`;
+            const pdfUploadRes = await fetch('/api/admin/books/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ path: pdfPath }),
+            });
+
+            if (!pdfUploadRes.ok) throw new Error('获取PDF上传链接失败');
+            const pdfUploadData = await pdfUploadRes.json();
+
+            // 上传PDF到COS
+            const pdfFormData = new FormData();
+            pdfFormData.append('key', pdfPath);
+            pdfFormData.append('Signature', pdfUploadData.authorization);
+            pdfFormData.append('x-cos-security-token', pdfUploadData.token);
+            pdfFormData.append('x-cos-meta-fileid', pdfUploadData.cos_file_id);
+            pdfFormData.append('file', pdf);
+
+            const pdfCosRes = await fetch(pdfUploadData.url, {
+                method: 'POST',
+                body: pdfFormData,
+            });
+
+            if (!pdfCosRes.ok) throw new Error('PDF上传失败');
+
+            const res = await fetch('/api/admin/books/uploadSuccess', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title,
+                    accessLevel,
+                    coverPath,
+                    pdfPath
+                }),
             });
 
             if (!res.ok) {
