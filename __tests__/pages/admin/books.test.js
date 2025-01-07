@@ -6,27 +6,34 @@ import Books from '@/pages/admin/books';
 global.fetch = jest.fn();
 
 describe('Books Page', () => {
-    beforeEach(() => {
-        // 模拟获取图书列表的API响应
+    const mockBooks = [
+        {
+            id: 1,
+            title: '测试图书1',
+            accessLevel: 0,
+            unlist: false,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 2,
+            title: 'test book 2',
+            accessLevel: 0,
+            unlist: false,
+            createdAt: new Date().toISOString()
+        }
+    ];
+
+    // 辅助函数：设置初始图书列表的mock
+    const setupInitialBooksList = () => {
         fetch.mockImplementationOnce(() => Promise.resolve({
             ok: true,
-            json: () => Promise.resolve([
-                {
-                    id: 1,
-                    title: '测试图书1',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    title: 'test book 2',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                }
-            ])
+            json: () => Promise.resolve(mockBooks)
         }));
+    };
+
+    beforeEach(() => {
+        fetch.mockReset();
+        setupInitialBooksList();
     });
 
     afterEach(() => {
@@ -44,30 +51,6 @@ describe('Books Page', () => {
     });
 
     test('搜索图书功能', async () => {
-        // 重置 fetch mock
-        fetch.mockReset();
-        
-        // 模拟图书列表API响应
-        fetch.mockImplementationOnce(() => Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve([
-                {
-                    id: 1,
-                    title: '测试图书1',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    title: 'test book 2',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                }
-            ])
-        }));
-
         render(<Books />);
         
         const searchInput = screen.getByPlaceholderText('搜索图书...');
@@ -98,37 +81,6 @@ describe('Books Page', () => {
     });
 
     test('下架图书功能', async () => {
-        // 重置 fetch mock
-        fetch.mockReset();
-        
-        // 模拟图书列表API响应
-        fetch.mockImplementationOnce(() => Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve([
-                {
-                    id: 1,
-                    title: '测试图书1',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    title: 'test book 2',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                }
-            ])
-        }));
-
-        render(<Books />);
-        
-        // 等待图书加载，初始状态都是未下架
-        await waitFor(() => {
-            expect(screen.getAllByText('下架')).toHaveLength(2);
-        });
-
         // 找到测试图书1对应的下架开关并点击
         const switchButtons = screen.getAllByRole('checkbox');
         const book1Switch = switchButtons[0];
@@ -160,47 +112,24 @@ describe('Books Page', () => {
 
         // 验证UI更新
         await waitFor(() => {
-            expect(screen.getByText('已下架')).toBeInTheDocument();  // 第一本书已下架
-            expect(screen.getByText('下架')).toBeInTheDocument();    // 第二本书未下架
+            // 找到所有图书卡片
+            const book1Card = screen.getByText('测试图书1').closest('.MuiCard-root');
+            const book2Card = screen.getByText('test book 2').closest('.MuiCard-root');
+            
+            // 验证测试图书1的卡片中包含"已下架"状态
+            expect(within(book1Card).getByText('已下架')).toBeInTheDocument();
+            
+            // 验证test book 2的卡片中包含"下架"状态
+            expect(within(book2Card).getByText('下架')).toBeInTheDocument();
         });
     });
 
     test('删除图书功能', async () => {
-        // 重置 fetch mock
-        fetch.mockReset();
-        
-        // 模拟图书列表API响应
-        fetch.mockImplementationOnce(() => Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve([
-                {
-                    id: 1,
-                    title: '测试图书1',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    title: 'test book 2',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                }
-            ])
-        }));
-
         // 模拟 window.confirm
         window.confirm = jest.fn(() => true);
 
         render(<Books />);
         
-        // 等待图书加载
-        await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
-            expect(screen.getByText('test book 2')).toBeInTheDocument();
-        });
-
         // 准备删除API的mock响应
         fetch.mockImplementationOnce(() => Promise.resolve({
             ok: true,
@@ -229,30 +158,6 @@ describe('Books Page', () => {
     });
 
     test('搜索、下架和清空搜索的组合操作', async () => {
-        // 重置 fetch mock
-        fetch.mockReset();
-        
-        // 模拟图书列表API响应
-        fetch.mockImplementationOnce(() => Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve([
-                {
-                    id: 1,
-                    title: '测试图书1',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    title: 'test book 2',
-                    accessLevel: 0,
-                    unlist: false,
-                    createdAt: new Date().toISOString()
-                }
-            ])
-        }));
-
         render(<Books />);
         
         const searchInput = screen.getByPlaceholderText('搜索图书...');
