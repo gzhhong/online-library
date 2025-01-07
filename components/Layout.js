@@ -11,7 +11,7 @@ export default function Layout({ children }) {
 
     const menuItems = [
         { text: '图书上传', icon: <CloudUpload />, path: '/admin/upload' },
-        { text: '图书浏览', icon: <LibraryBooks />, path: '/admin/books' },
+        { text: '图书管理', icon: <LibraryBooks />, path: '/admin/books' },
         { text: '用户管理', icon: <People />, path: '/admin/users' },
         { text: '访客记录', icon: <History />, path: '/admin/guests' }
     ];
