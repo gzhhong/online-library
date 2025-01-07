@@ -151,7 +151,7 @@ export default function Users() {
         } catch (error) {
             setStatus({ type: 'error', message: error.message });
         } finally {
-            handleDeleteCancel();
+            handleReset();
         }
     };
 
