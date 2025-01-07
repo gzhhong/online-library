@@ -13,6 +13,7 @@ model Book {
   accessLevel Int      @default(0)
   coverPath   String
   pdfPath     String
+  unlist      Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
 

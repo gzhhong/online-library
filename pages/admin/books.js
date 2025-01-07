@@ -12,7 +12,9 @@ import {
     Box,
     CircularProgress,
     TextField,
-    InputAdornment
+    InputAdornment,
+    Switch,
+    FormControlLabel
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import Layout from '@/components/Layout';
@@ -23,6 +25,7 @@ export default function Books() {
     const [loading, setLoading] = useState(true);
     const [searchText, setSearchText] = useState('');
     const router = useRouter();
+    const [updatingId, setUpdatingId] = useState(null);
 
     function getFullUrl(path) {
         return `${window.location.origin}/api/files${path}`;
@@ -54,7 +57,8 @@ export default function Books() {
             });
 
             if (res.ok) {
-                setBooks(books.filter(book => book.id !== id));
+                setBooks(currentBooks => currentBooks.filter(book => book.id !== id));
+                setAllBooks(currentAllBooks => currentAllBooks.filter(book => book.id !== id));
             } else {
                 const data = await res.json();
                 alert(data.message || '删除失败');
@@ -82,6 +86,37 @@ export default function Books() {
             alert('无法预览PDF文件');
         }
     }
+
+    const handleUnlistChange = async (book) => {
+        try {
+            setUpdatingId(book.id);
+            const res = await fetch('/api/admin/books/update', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: book.id,
+                    unlist: !book.unlist
+                })
+            });
+
+            if (!res.ok) throw new Error('更新图书状态失败');
+            
+            const updatedBook = await res.json();
+            
+            setBooks(currentBooks => currentBooks.map(b => 
+                b.id === updatedBook.id ? updatedBook : b
+            ));
+            
+            setAllBooks(currentAllBooks => currentAllBooks.map(b => 
+                b.id === updatedBook.id ? updatedBook : b
+            ));
+
+        } catch (error) {
+            console.error('更新图书状态失败:', error);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
 
     useEffect(() => {
         async function fetchBooks() {
@@ -172,6 +207,18 @@ export default function Books() {
                                         </Typography>
                                     </CardContent>
                                     <CardActions sx={{ justifyContent: 'flex-end' }}>
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={book.unlist}
+                                                    onChange={() => handleUnlistChange(book)}
+                                                    disabled={updatingId === book.id}
+                                                />
+                                            }
+                                            label={updatingId === book.id ? 
+                                                <CircularProgress size={16} /> : 
+                                                (book.unlist ? "已下架" : "下架")}
+                                        />
                                         <Button
                                             size="small"
                                             color="primary"

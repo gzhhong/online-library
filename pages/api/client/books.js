@@ -50,12 +50,13 @@ export default async function handler(req, res) {
       }
     }
 
-    // 获取用户可访问的图书
+    // 获取用户可访问的图书，不包括下架的图书
     const books = await prisma.book.findMany({
       where: {
-        accessLevel: {
-          lte: accessLevel
-        }
+        AND: [
+          { accessLevel: { lte: accessLevel } },
+          { unlist: false }
+        ]
       },
       orderBy: {
         createdAt: 'desc'
