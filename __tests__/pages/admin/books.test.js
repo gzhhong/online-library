@@ -57,7 +57,6 @@ describe('Books Page', () => {
         
         // 等待初始图书列表加载
         await waitFor(() => {
-            screen.debug();
             expect(screen.getByText('测试图书1', { exact: false })).toBeInTheDocument();
             expect(screen.getByText('test book 2', { exact: false })).toBeInTheDocument();
         }, { timeout: 3000 });

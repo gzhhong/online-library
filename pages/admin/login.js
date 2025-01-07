@@ -28,7 +28,7 @@ export default function Login() {
                 throw new Error(error.message || '登录失败');
             }
 
-            await router.push('/admin/books');
+            await router.push('/admin/upload');
         } catch (err) {
             setError(err.message);
         } finally {
