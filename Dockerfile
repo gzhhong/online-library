@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装依赖
-RUN npm install
+RUN npm cache clean --force && npm install
 
 # 复制源代码
 COPY . .
