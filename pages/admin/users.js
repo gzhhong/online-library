@@ -147,12 +147,13 @@ export default function Users() {
             }
 
             setStatus({ type: 'success', message: '用户删除成功' });
-            fetchUsers(); // 刷新用户列表
+            handleDeleteCancel();
+            fetchUsers();
+            handleReset();
         } catch (error) {
             setStatus({ type: 'error', message: error.message });
-        } finally {
             handleDeleteCancel();
-            handleReset();
+        } finally {
         }
     };
 
