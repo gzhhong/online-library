@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
@@ -16,20 +18,38 @@
     "@prisma/client": "^6.1.0",
     "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
-    "cos-nodejs-sdk-v5": "^2.13.3",
     "cookie": "^0.5.0",
+    "cos-nodejs-sdk-v5": "^2.13.3",
     "formidable": "^3.2.5",
     "jsonwebtoken": "^9.0.0",
     "next": "13.4.2",
-    "request": "^2.88.2",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "request": "^2.88.2"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "20.1.4",
     "@types/react": "18.2.6",
     "eslint": "8.40.0",
     "eslint-config-next": "13.4.2",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "prisma": "^6.1.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    },
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { "presets": ["next/babel"] }]
+    }
   }
 }
