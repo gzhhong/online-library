@@ -17,6 +17,7 @@ import {
     FormControlLabel
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import UploadIcon from '@mui/icons-material/Upload';
 import Layout from '@/components/Layout';
 
 export default function Books() {
@@ -141,34 +142,42 @@ export default function Books() {
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center flex-1">
                         <h1 className="text-3xl font-bold text-gray-800 mr-4">图书管理</h1>
-                        <TextField
-                            size="small"
-                            placeholder="搜索图书..."
-                            value={searchText}
-                            onChange={handleSearch}
-                            sx={{ 
-                                width: 300,
-                                ml: 'auto',
-                                mr: 2,
-                                '& .MuiOutlinedInput-root': {
-                                    backgroundColor: 'white'
-                                }
-                            }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon color="action" />
-                                    </InputAdornment>
-                                )
-                            }}
-                        />
+                        <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'flex-end', 
+                            alignItems: 'center',
+                            gap: 2,  // 元素之间的间距
+                            mb: 2 
+                        }}>
+                            <TextField
+                                placeholder="搜索图书..."
+                                value={searchText}
+                                onChange={handleSearch}
+                                size="small"
+                                sx={{ 
+                                    width: 300,
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: 'white'
+                                    }
+                                }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon color="action" />
+                                        </InputAdornment>
+                                    )
+                                }}
+                            />
+                            <Link href="/admin/upload" passHref>
+                                <Button 
+                                    variant="contained" 
+                                    startIcon={<UploadIcon />}
+                                >
+                                    上传新书
+                                </Button>
+                            </Link>
+                        </Box>
                     </div>
-                    <Link 
-                        href="/admin/upload" 
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
-                    >
-                        上传新书
-                    </Link>
                 </div>
 
                 {loading ? (
