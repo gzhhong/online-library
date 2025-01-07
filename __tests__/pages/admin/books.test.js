@@ -81,6 +81,13 @@ describe('Books Page', () => {
     });
 
     test('下架图书功能', async () => {
+        render(<Books />);
+        
+        // 等待图书加载，初始状态都是未下架
+        await waitFor(() => {
+            expect(screen.getAllByText('下架')).toHaveLength(2);
+        });
+
         // 找到测试图书1对应的下架开关并点击
         const switchButtons = screen.getAllByRole('checkbox');
         const book1Switch = switchButtons[0];
@@ -130,6 +137,12 @@ describe('Books Page', () => {
 
         render(<Books />);
         
+        // 等待图书加载完成
+        await waitFor(() => {
+            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('test book 2')).toBeInTheDocument();
+        });
+
         // 准备删除API的mock响应
         fetch.mockImplementationOnce(() => Promise.resolve({
             ok: true,
@@ -220,6 +233,62 @@ describe('Books Page', () => {
             
             // 验证test book 2的卡片中包含"下架"状态
             expect(within(book2Card).getByText('下架')).toBeInTheDocument();
+        });
+    });
+
+    test('搜索、删除和清空搜索的组合操作', async () => {
+        // 模拟 window.confirm
+        window.confirm = jest.fn(() => true);
+
+        render(<Books />);
+        
+        const searchInput = screen.getByPlaceholderText('搜索图书...');
+        
+        // 等待初始图书列表加载
+        await waitFor(() => {
+            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('test book 2')).toBeInTheDocument();
+        });
+
+        // 1. 搜索"测试"
+        await userEvent.type(searchInput, '测试');
+        await waitFor(() => {
+            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.queryByText('test book 2')).not.toBeInTheDocument();
+        });
+
+        // 2. 准备删除API响应
+        fetch.mockImplementationOnce(() => Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ message: 'Book deleted successfully' })
+        }));
+
+        // 点击删除按钮
+        const deleteButton = screen.getByText('删除');
+        await userEvent.click(deleteButton);
+
+        // 验证确认对话框被调用
+        expect(window.confirm).toHaveBeenCalledWith('确定要删除这本书吗？');
+
+        // 验证API调用
+        expect(fetch).toHaveBeenCalledWith(
+            '/api/admin/books/delete?id=1',
+            { method: 'DELETE' }
+        );
+
+        // 验证搜索结果为空
+        await waitFor(() => {
+            expect(screen.queryByText('测试图书1')).not.toBeInTheDocument();
+            expect(screen.queryByText('test book 2')).not.toBeInTheDocument();
+        });
+
+        // 3. 清空搜索框
+        await userEvent.clear(searchInput);
+
+        // 验证只剩下 test book 2
+        await waitFor(() => {
+            expect(screen.queryByText('测试图书1')).not.toBeInTheDocument();
+            expect(screen.getByText('test book 2')).toBeInTheDocument();
         });
     });
 
