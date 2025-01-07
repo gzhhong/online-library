@@ -10,8 +10,8 @@ export default function Layout({ children }) {
     const [loading, setLoading] = useState(false);
 
     const menuItems = [
-        { text: '图书上传', icon: <CloudUpload />, path: '/admin/upload' },
-        { text: '图书管理', icon: <LibraryBooks />, path: '/admin/books' },
+        { text: '期刊上传', icon: <CloudUpload />, path: '/admin/upload' },
+        { text: '期刊管理', icon: <LibraryBooks />, path: '/admin/books' },
         { text: '用户管理', icon: <People />, path: '/admin/users' },
         { text: '访客记录', icon: <History />, path: '/admin/guests' }
     ];
@@ -28,7 +28,7 @@ export default function Layout({ children }) {
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar>
                     <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-                        图书馆管理系统
+                        期刊馆管理系统
                     </Typography>
                     <IconButton 
                         color="inherit" 

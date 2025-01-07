@@ -48,7 +48,7 @@ export default function Books() {
     };
 
     async function handleDelete(id) {
-        if (!confirm('确定要删除这本书吗？')) {
+        if (!confirm('确定要删除这本期刊吗？')) {
             return;
         }
 
@@ -100,7 +100,7 @@ export default function Books() {
                 })
             });
 
-            if (!res.ok) throw new Error('更新图书状态失败');
+            if (!res.ok) throw new Error('更新期刊状态失败');
             
             const updatedBook = await res.json();
             
@@ -113,7 +113,7 @@ export default function Books() {
             ));
 
         } catch (error) {
-            console.error('更新图书状态失败:', error);
+            console.error('更新期刊状态失败:', error);
         } finally {
             setUpdatingId(null);
         }
@@ -123,12 +123,12 @@ export default function Books() {
         async function fetchBooks() {
             try {
                 const res = await fetch('/api/admin/books/list');
-                if (!res.ok) throw new Error('获取图书列表失败');
+                if (!res.ok) throw new Error('获取期刊列表失败');
                 const data = await res.json();
                 setBooks(data);
                 setAllBooks(data);
             } catch (error) {
-                console.error('获取图书列表失败:', error);
+                console.error('获取期刊列表失败:', error);
             } finally {
                 setLoading(false);
             }
@@ -141,7 +141,7 @@ export default function Books() {
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center flex-1">
-                        <h1 className="text-3xl font-bold text-gray-800 mr-4">图书管理</h1>
+                        <h1 className="text-3xl font-bold text-gray-800 mr-4">期刊管理</h1>
                         <Box sx={{ 
                             display: 'flex', 
                             justifyContent: 'flex-end', 
@@ -150,7 +150,7 @@ export default function Books() {
                             mb: 2 
                         }}>
                             <TextField
-                                placeholder="搜索图书..."
+                                placeholder="搜索期刊..."
                                 value={searchText}
                                 onChange={handleSearch}
                                 size="small"
@@ -173,7 +173,7 @@ export default function Books() {
                                     variant="contained" 
                                     startIcon={<UploadIcon />}
                                 >
-                                    上传新书
+                                    上传新期刊
                                 </Button>
                             </Link>
                         </Box>
@@ -185,7 +185,7 @@ export default function Books() {
                         <Box sx={{ textAlign: 'center' }}>
                             <CircularProgress sx={{ mb: 2 }} />
                             <Typography color="text.secondary">
-                                正在获取图书列表...
+                                正在获取期刊列表...
                             </Typography>
                         </Box>
                     </Box>

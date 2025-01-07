@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 获取用户可访问的图书，不包括下架的图书
+    // 获取用户可访问的期刊，不包括下架的期刊
     const books = await prisma.book.findMany({
       where: {
         AND: [

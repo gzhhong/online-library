@@ -9,7 +9,7 @@ describe('Books Page', () => {
     const mockBooks = [
         {
             id: 1,
-            title: '测试图书1',
+            title: '测试期刊1',
             accessLevel: 0,
             unlist: false,
             createdAt: new Date().toISOString()
@@ -23,7 +23,7 @@ describe('Books Page', () => {
         }
     ];
 
-    // 辅助函数：设置初始图书列表的mock
+    // 辅助函数：设置初始期刊列表的mock
     const setupInitialBooksList = () => {
         fetch.mockImplementationOnce(() => Promise.resolve({
             ok: true,
@@ -40,31 +40,31 @@ describe('Books Page', () => {
         jest.clearAllMocks();
     });
 
-    test('显示图书列表', async () => {
+    test('显示期刊列表', async () => {
         render(<Books />);
         
         // 等待加载完成
         await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1')).toBeInTheDocument();
             expect(screen.getByText('test book 2')).toBeInTheDocument();
         });
     });
 
-    test('搜索图书功能', async () => {
+    test('搜索期刊功能', async () => {
         render(<Books />);
         
-        const searchInput = screen.getByPlaceholderText('搜索图书...');
+        const searchInput = screen.getByPlaceholderText('搜索期刊...');
         
-        // 等待初始图书列表加载
+        // 等待初始期刊列表加载
         await waitFor(() => {
-            expect(screen.getByText('测试图书1', { exact: false })).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1', { exact: false })).toBeInTheDocument();
             expect(screen.getByText('test book 2', { exact: false })).toBeInTheDocument();
         }, { timeout: 3000 });
 
         // 测试中文搜索
         await userEvent.type(searchInput, '测试');
         await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1')).toBeInTheDocument();
             expect(screen.queryByText('test book 2')).not.toBeInTheDocument();
         });
 
@@ -75,19 +75,19 @@ describe('Books Page', () => {
         await userEvent.type(searchInput, 'test');
         await waitFor(() => {
             expect(screen.getByText('test book 2')).toBeInTheDocument();
-            expect(screen.queryByText('测试图书1')).not.toBeInTheDocument();
+            expect(screen.queryByText('测试期刊1')).not.toBeInTheDocument();
         });
     });
 
-    test('下架图书功能', async () => {
+    test('下架期刊功能', async () => {
         render(<Books />);
         
-        // 等待图书加载，初始状态都是未下架
+        // 等待期刊加载，初始状态都是未下架
         await waitFor(() => {
             expect(screen.getAllByText('下架')).toHaveLength(2);
         });
 
-        // 找到测试图书1对应的下架开关并点击
+        // 找到测试期刊1对应的下架开关并点击
         const switchButtons = screen.getAllByRole('checkbox');
         const book1Switch = switchButtons[0];
 
@@ -96,7 +96,7 @@ describe('Books Page', () => {
             ok: true,
             json: () => Promise.resolve({
                 id: 1,
-                title: '测试图书1',
+                title: '测试期刊1',
                 accessLevel: 0,
                 unlist: true,
                 createdAt: new Date().toISOString()
@@ -118,11 +118,11 @@ describe('Books Page', () => {
 
         // 验证UI更新
         await waitFor(() => {
-            // 找到所有图书卡片
-            const book1Card = screen.getByText('测试图书1').closest('.MuiCard-root');
+            // 找到所有期刊卡片
+            const book1Card = screen.getByText('测试期刊1').closest('.MuiCard-root');
             const book2Card = screen.getByText('test book 2').closest('.MuiCard-root');
             
-            // 验证测试图书1的卡片中包含"已下架"状态
+            // 验证测试期刊1的卡片中包含"已下架"状态
             expect(within(book1Card).getByText('已下架')).toBeInTheDocument();
             
             // 验证test book 2的卡片中包含"下架"状态
@@ -130,15 +130,15 @@ describe('Books Page', () => {
         });
     });
 
-    test('删除图书功能', async () => {
+    test('删除期刊功能', async () => {
         // 模拟 window.confirm
         window.confirm = jest.fn(() => true);
 
         render(<Books />);
         
-        // 等待图书加载完成
+        // 等待期刊加载完成
         await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1')).toBeInTheDocument();
             expect(screen.getByText('test book 2')).toBeInTheDocument();
         });
 
@@ -154,7 +154,7 @@ describe('Books Page', () => {
         await userEvent.click(firstBookDeleteButton);
 
         // 验证确认对话框被调用
-        expect(window.confirm).toHaveBeenCalledWith('确定要删除这本书吗？');
+        expect(window.confirm).toHaveBeenCalledWith('确定要删除这本期刊吗？');
 
         // 验证API调用
         expect(fetch).toHaveBeenCalledWith(
@@ -164,7 +164,7 @@ describe('Books Page', () => {
 
         // 验证UI更新：第一本书被移除，第二本书保留
         await waitFor(() => {
-            expect(screen.queryByText('测试图书1')).not.toBeInTheDocument();
+            expect(screen.queryByText('测试期刊1')).not.toBeInTheDocument();
             expect(screen.getByText('test book 2')).toBeInTheDocument();
         });
     });
@@ -172,27 +172,27 @@ describe('Books Page', () => {
     test('搜索、下架和清空搜索的组合操作', async () => {
         render(<Books />);
         
-        const searchInput = screen.getByPlaceholderText('搜索图书...');
+        const searchInput = screen.getByPlaceholderText('搜索期刊...');
         
-        // 等待初始图书列表加载
+        // 等待初始期刊列表加载
         await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1')).toBeInTheDocument();
             expect(screen.getByText('test book 2')).toBeInTheDocument();
         });
 
         // 1. 搜索"测试"
         await userEvent.type(searchInput, '测试');
         await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1')).toBeInTheDocument();
             expect(screen.queryByText('test book 2')).not.toBeInTheDocument();
         });
 
-        // 2. 准备更新API响应，改变测试图书1的下架状态
+        // 2. 准备更新API响应，改变测试期刊1的下架状态
         fetch.mockImplementationOnce(() => Promise.resolve({
             ok: true,
             json: () => Promise.resolve({
                 id: 1,
-                title: '测试图书1',
+                title: '测试期刊1',
                 accessLevel: 0,
                 unlist: true,
                 createdAt: new Date().toISOString()
@@ -213,7 +213,7 @@ describe('Books Page', () => {
             })
         });
 
-        // 验证测试图书1状态更新为已下架
+        // 验证测试期刊1状态更新为已下架
         await waitFor(() => {
             expect(screen.getByText('已下架')).toBeInTheDocument();
         });
@@ -223,11 +223,11 @@ describe('Books Page', () => {
 
         // 验证两本书都显示，且状态正确
         await waitFor(() => {
-            // 找到所有图书卡片
-            const book1Card = screen.getByText('测试图书1').closest('.MuiCard-root');
+            // 找到所有期刊卡片
+            const book1Card = screen.getByText('测试期刊1').closest('.MuiCard-root');
             const book2Card = screen.getByText('test book 2').closest('.MuiCard-root');
             
-            // 验证测试图书1的卡片中包含"已下架"状态
+            // 验证测试期刊1的卡片中包含"已下架"状态
             expect(within(book1Card).getByText('已下架')).toBeInTheDocument();
             
             // 验证test book 2的卡片中包含"下架"状态
@@ -241,18 +241,18 @@ describe('Books Page', () => {
 
         render(<Books />);
         
-        const searchInput = screen.getByPlaceholderText('搜索图书...');
+        const searchInput = screen.getByPlaceholderText('搜索期刊...');
         
-        // 等待初始图书列表加载
+        // 等待初始期刊列表加载
         await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1')).toBeInTheDocument();
             expect(screen.getByText('test book 2')).toBeInTheDocument();
         });
 
         // 1. 搜索"测试"
         await userEvent.type(searchInput, '测试');
         await waitFor(() => {
-            expect(screen.getByText('测试图书1')).toBeInTheDocument();
+            expect(screen.getByText('测试期刊1')).toBeInTheDocument();
             expect(screen.queryByText('test book 2')).not.toBeInTheDocument();
         });
 
@@ -267,7 +267,7 @@ describe('Books Page', () => {
         await userEvent.click(deleteButton);
 
         // 验证确认对话框被调用
-        expect(window.confirm).toHaveBeenCalledWith('确定要删除这本书吗？');
+        expect(window.confirm).toHaveBeenCalledWith('确定要删除这本期刊吗？');
 
         // 验证API调用
         expect(fetch).toHaveBeenCalledWith(
@@ -277,7 +277,7 @@ describe('Books Page', () => {
 
         // 验证搜索结果为空
         await waitFor(() => {
-            expect(screen.queryByText('测试图书1')).not.toBeInTheDocument();
+            expect(screen.queryByText('测试期刊1')).not.toBeInTheDocument();
             expect(screen.queryByText('test book 2')).not.toBeInTheDocument();
         });
 
@@ -286,7 +286,7 @@ describe('Books Page', () => {
 
         // 验证只剩下 test book 2
         await waitFor(() => {
-            expect(screen.queryByText('测试图书1')).not.toBeInTheDocument();
+            expect(screen.queryByText('测试期刊1')).not.toBeInTheDocument();
             expect(screen.getByText('test book 2')).toBeInTheDocument();
         });
     });

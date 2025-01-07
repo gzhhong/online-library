@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     // 构造文件路径
     const fileUrlPath = '/' + path.join('/');
 
-    // 查找对应的图书记录
+    // 查找对应的期刊记录
     const book = await prisma.book.findFirst({
       where: {
         OR: [

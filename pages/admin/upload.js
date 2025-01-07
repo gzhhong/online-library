@@ -133,7 +133,7 @@ export default function Upload() {
             }
 
             console.log('Book record created successfully');
-            setStatus({ type: 'success', message: '图书上传成功！' });
+            setStatus({ type: 'success', message: '期刊上传成功！' });
             setTitle('');
             setAccessLevel(0);
             setCover(null);
@@ -154,7 +154,7 @@ export default function Upload() {
         <Layout>
             <Paper elevation={3} sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
                 <Typography variant="h5" gutterBottom>
-                    上传新图书
+                    上传新期刊
                 </Typography>
                 {status.message && (
                     <Alert severity={status.type} sx={{ mb: 2 }}>
@@ -164,7 +164,7 @@ export default function Upload() {
                 <form onSubmit={handleSubmit}>
                     <TextField
                         fullWidth
-                        label="图书标题"
+                        label="期刊标题"
                         margin="normal"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
@@ -249,7 +249,7 @@ export default function Upload() {
                         sx={{ mt: 3 }}
                         disabled={loading || !title || !cover || !pdf}
                     >
-                        {loading ? <CircularProgress size={24} /> : '上传图书'}
+                        {loading ? <CircularProgress size={24} /> : '上传期刊'}
                     </Button>
                 </form>
             </Paper>
