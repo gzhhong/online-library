@@ -16,7 +16,15 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const { title, accessLevel, coverPath, pdfPath } = req.body;
+    const { 
+      title, 
+      accessLevel, 
+      coverPath, 
+      pdfPath,
+      year,
+      issue,
+      description 
+    } = req.body;
 
     // 确保路径以'/'开头，以符合文件服务的要求
     const normalizedCoverPath = coverPath.startsWith('/') ? coverPath : `/${coverPath}`;
@@ -36,9 +44,9 @@ export default async function handler(req, res) {
         accessLevel: parseInt(accessLevel),
         coverPath: normalizedCoverPath,  // 存入数据库的路径需要以'/'开头
         pdfPath: normalizedPdfPath,      // 存入数据库的路径需要以'/'开头
-        year: req.body.year ? parseInt(req.body.year) : null,
-        issue: req.body.issue ? parseInt(req.body.issue) : null,
-        description: req.body.description || null,
+        year: year ? parseInt(year) : null,
+        issue: issue ? parseInt(issue) : null,
+        description: description || null
       }
     });
 

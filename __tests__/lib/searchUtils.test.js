@@ -125,6 +125,13 @@ describe('parseSearchText', () => {
             accessLevel: 2,
             accessLevelOp: 'gte'
         });
+
+
+        expect(parseSearchText('10月份2级以上杂志')).toMatchObject({
+            issue: 10,
+            accessLevel: 2,
+            accessLevelOp: 'gte'
+        });
     });
 
     test('忽略无关词语', () => {

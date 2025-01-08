@@ -133,7 +133,10 @@ export default function Upload() {
                     title,
                     accessLevel,
                     coverPath,
-                    pdfPath
+                    pdfPath,
+                    year: year ? parseInt(year) : null,
+                    issue: issue ? parseInt(issue) : null,
+                    description: description || null
                 }),
             });
 
