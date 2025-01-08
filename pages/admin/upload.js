@@ -35,6 +35,8 @@ export default function Upload() {
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB in bytes
 
     const handleFileChange = (e, type) => {
+        // 获取 input 元素
+        const input = e.target;
         const file = e.target.files[0];
         if (file) {
             if (file.size > MAX_FILE_SIZE) {
@@ -52,6 +54,8 @@ export default function Upload() {
             }
             setStatus({ type: '', message: '' });
         }
+        // 重置 input 的值，这样相同的文件也能再次选择
+        input.value = '';
     };
 
     const handleSubmit = async (e) => {
@@ -272,6 +276,7 @@ export default function Upload() {
                             type="file"
                             id="cover-file"
                             onChange={(e) => handleFileChange(e, 'cover')}
+                            onClick={(e) => { e.target.value = ''; }}
                             style={{ display: 'none' }}
                             disabled={loading}
                         />

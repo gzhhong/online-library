@@ -7,7 +7,8 @@ import {
     Box,
     CircularProgress,
     TextField,
-    InputAdornment
+    InputAdornment,
+    Typography
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import UploadIcon from '@mui/icons-material/Upload';
