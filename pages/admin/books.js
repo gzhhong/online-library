@@ -19,6 +19,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import UploadIcon from '@mui/icons-material/Upload';
 import Layout from '@/components/Layout';
+import { parseSearchText } from '@/lib/searchUtils';
 
 export default function Books() {
     const [books, setBooks] = useState([]);
@@ -32,19 +33,53 @@ export default function Books() {
         return `${window.location.origin}/api/files${path}`;
     }
 
-    const handleSearch = (event) => {
-        const value = event.target.value;
-        setSearchText(value);
+    const handleSearch = (e) => {
+        const searchText = e.target.value;
+        setSearchText(searchText);
         
-        if (value.length >= 3 || /[\u4e00-\u9fa5]{2,}/.test(value)) {
-            const searchValue = value.trim().toLowerCase();
-            const filtered = allBooks.filter(book => 
-                book.title.toLowerCase().includes(searchValue)
-            );
-            setBooks(filtered);
-        } else if (!value) {
-            setBooks(allBooks);
-        }
+        const { year, issue, keyword, accessLevel, accessLevelOp } = parseSearchText(searchText);
+
+        // 过滤图书
+        const filtered = allBooks.filter(book => {
+            let matches = true;
+
+            // 按年份过滤
+            if (year !== null) {
+                matches = matches && book.year === year;
+            }
+
+            // 按期数过滤
+            if (issue !== null) {
+                matches = matches && book.issue === issue;
+            }
+
+            // 按访问权限过滤
+            if (accessLevel !== null) {
+                switch (accessLevelOp) {
+                    case 'gte':
+                        matches = matches && book.accessLevel >= accessLevel;
+                        break;
+                    case 'lte':
+                        matches = matches && book.accessLevel <= accessLevel;
+                        break;
+                    case 'eq':
+                        matches = matches && book.accessLevel === accessLevel;
+                        break;
+                }
+            }
+
+            // 按关键词过滤（标题或简介中包含关键词）
+            if (keyword) {
+                const keywordLower = keyword.toLowerCase();
+                const titleMatches = book.title.toLowerCase().includes(keywordLower);
+                const descriptionMatches = book.description?.toLowerCase().includes(keywordLower) || false;
+                matches = matches && (titleMatches || descriptionMatches);
+            }
+
+            return matches;
+        });
+
+        setBooks(filtered);
     };
 
     async function handleDelete(id) {
@@ -167,6 +202,7 @@ export default function Books() {
                                         </InputAdornment>
                                     )
                                 }}
+                                helperText="支持年份、期数和关键词组合搜索，如：2024年第10期意林"
                             />
                             <Link href="/admin/upload" passHref>
                                 <Button 

@@ -1,4 +1,5 @@
 import prisma from '@/lib/db';
+import { parseSearchText } from '@/lib/searchUtils';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -7,7 +8,13 @@ export default async function handler(req, res) {
   console.log('just in the handler of api/client/books');
 
   try {
-    const { nickName } = req.query;
+    const { nickName, searchText } = req.query;
+    // 只有当 searchText 存在且不为空字符串时才解析搜索条件
+    const searchConditions = searchText?.trim() 
+      ? parseSearchText(searchText)
+      : { year: null, issue: null, keyword: null };
+    
+    const { year, issue, keyword } = searchConditions;
 
     // 更新用户最后访问时间
     let user = await prisma.user.findUnique({
@@ -50,13 +57,42 @@ export default async function handler(req, res) {
       }
     }
 
-    // 获取用户可访问的期刊，不包括下架的期刊
+    // 构建查询条件
+    const searchFilters = [
+      { accessLevel: { lte: accessLevel } },
+      { unlist: false }
+    ];
+
+    // 只添加有值的搜索条件
+    if (year !== null) searchFilters.push({ year });
+    if (issue !== null) searchFilters.push({ issue });
+    if (searchConditions.accessLevel !== null) {
+      const levelFilter = { accessLevel: {} };
+      switch (searchConditions.accessLevelOp) {
+        case 'gte':
+          levelFilter.accessLevel.gte = searchConditions.accessLevel;
+          break;
+        case 'lte':
+          levelFilter.accessLevel.lte = searchConditions.accessLevel;
+          break;
+        case 'eq':
+          levelFilter.accessLevel.equals = searchConditions.accessLevel;
+          break;
+      }
+      searchFilters.push(levelFilter);
+    }
+    if (keyword !== null) {
+      searchFilters.push({
+        OR: [
+          { title: { contains: keyword } },
+          { description: { contains: keyword } }
+        ]
+      });
+    }
+
     const books = await prisma.book.findMany({
       where: {
-        AND: [
-          { accessLevel: { lte: accessLevel } },
-          { unlist: false }
-        ]
+        AND: searchFilters
       },
       orderBy: {
         createdAt: 'desc'
