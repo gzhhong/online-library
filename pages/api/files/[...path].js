@@ -109,12 +109,25 @@ export default async function handler(req, res) {
       throw new Error(`Failed to get download URL for file: ${fileInfo.errmsg}`);
     }
 
+    // 检查URL是否需要编码
+    let redirectUrl = fileInfo.download_url;
+    try {
+      // 尝试解析URL，如果失败说明需要编码
+      new URL(redirectUrl);
+    } catch (error) {
+      console.log('URL needs encoding:', redirectUrl);
+      // 对URL进行编码，但保留原有的合法字符
+      redirectUrl = encodeURI(redirectUrl);
+      console.log('Encoded URL:', redirectUrl);
+    }
+
     console.log('Redirecting to download URL:', {
-      url: fileInfo.download_url// 只显示URL的前50个字符
+      originalUrl: fileInfo.download_url,
+      encodedUrl: redirectUrl
     });
 
     // 重定向到临时链接
-    res.redirect(fileInfo.download_url);
+    res.redirect(redirectUrl);
 
   } catch (error) {
     console.error('File access error:', {
