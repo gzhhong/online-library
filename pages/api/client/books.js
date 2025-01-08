@@ -12,16 +12,28 @@ export default async function handler(req, res) {
     // 只有当 searchText 存在且不为空字符串时才解析搜索条件
     const searchConditions = searchText?.trim() 
       ? parseSearchText(searchText)
-      : { year: null, issue: null, keyword: null };
+      : { 
+        year: null, 
+        issue: null, 
+        keyword: null, 
+        accessLevel: null, 
+        accessLevelOp: null 
+      };
     
-    const { year, issue, keyword } = searchConditions;
+    const { 
+      year, 
+      issue, 
+      keyword, 
+      accessLevel: searchAccessLevel,  // 重命名以避免冲突
+      accessLevelOp 
+    } = searchConditions;
 
     // 更新用户最后访问时间
     let user = await prisma.user.findUnique({
       where: { nickName }
     });
 
-    let accessLevel = 0;
+    let userAccessLevel = 0;  // 重命名用户的访问权限变量
 
     if (user) {
       // 更新用户访问时间
@@ -29,7 +41,7 @@ export default async function handler(req, res) {
         where: { nickName },
         data: { lastVisit: new Date() }
       });
-      accessLevel = user.accessLevel;
+      userAccessLevel = user.accessLevel;
     } else {
       // 记录访问日志
       let accessLog = await prisma.accessLog.findUnique({
@@ -58,42 +70,50 @@ export default async function handler(req, res) {
     }
 
     // 构建查询条件
-    const searchFilters = [
-      { accessLevel: { lte: accessLevel } },
-      { unlist: false }
-    ];
+    const where = {
+      unlist: false, // 只返回未下架的期刊
+      accessLevel: { lte: userAccessLevel }  // 用户只能看到自己权限范围内的期刊
+    };
 
-    // 只添加有值的搜索条件
-    if (year !== null) searchFilters.push({ year });
-    if (issue !== null) searchFilters.push({ issue });
-    if (searchConditions.accessLevel !== null) {
-      const levelFilter = { accessLevel: {} };
-      switch (searchConditions.accessLevelOp) {
+    if (year) {
+      where.year = year;
+    }
+
+    if (issue) {
+      where.issue = issue;
+    }
+
+    // 处理访问权限条件
+    if (searchAccessLevel !== null) {
+      switch (accessLevelOp) {
         case 'gte':
-          levelFilter.accessLevel.gte = searchConditions.accessLevel;
+          where.accessLevel = { 
+            gte: searchAccessLevel,
+            lte: userAccessLevel  // 保持在用户权限范围内
+          };
           break;
         case 'lte':
-          levelFilter.accessLevel.lte = searchConditions.accessLevel;
+          where.accessLevel = { 
+            lte: Math.min(searchAccessLevel, userAccessLevel)  // 取较小值
+          };
           break;
         case 'eq':
-          levelFilter.accessLevel.equals = searchConditions.accessLevel;
-          break;
+        default:
+          if (searchAccessLevel <= userAccessLevel) {
+            where.accessLevel = searchAccessLevel;
+          }
       }
-      searchFilters.push(levelFilter);
     }
-    if (keyword !== null) {
-      searchFilters.push({
-        OR: [
-          { title: { contains: keyword } },
-          { description: { contains: keyword } }
-        ]
-      });
+
+    if (keyword) {
+      where.OR = [
+        { title: { contains: keyword } },
+        { description: { contains: keyword } }
+      ];
     }
 
     const books = await prisma.book.findMany({
-      where: {
-        AND: searchFilters
-      },
+      where,
       orderBy: {
         createdAt: 'desc'
       }
