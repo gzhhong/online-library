@@ -64,9 +64,18 @@ export default async function handler(req, res) {
       'gif': 'image/gif'
     };
     
-    if (contentTypes[ext]) {
+    if (ext in contentTypes) {
       res.setHeader('Content-Type', contentTypes[ext]);
     }
+
+    // 根据文件类型设置不同的缓存策略
+    const cacheControl = ext === '.pdf' 
+      ? 'public, max-age=3600'           // PDF文件缓存1小时
+      : ext === '.jpg' || ext === '.png'
+      ? 'public, max-age=604800'         // 图片缓存1周
+      : 'no-store';                      // 其他文件不缓存
+    
+    res.setHeader('Cache-Control', cacheControl);
 
     // 获取并返回文件
     await streamFileToResponse(cloudPath, res);

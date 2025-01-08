@@ -161,6 +161,18 @@ describe('parseSearchText', () => {
             keyword: '意林'
         });
 
+        expect(parseSearchText('2023 11 意林')).toMatchObject({
+            year: 2023,
+            issue: 11,
+            keyword: '意林'
+        });
+
+        expect(parseSearchText('2023 11 3级')).toMatchObject({
+            year: 2023,
+            issue: 11,
+            accessLevel: 3,
+            accessLevelOp: 'eq'
+        });
         // 处理中英文混合的标点符号
         expect(parseSearchText('2024年，第10期，意林')).toMatchObject({
             year: 2024,
