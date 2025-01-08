@@ -110,16 +110,7 @@ export default async function handler(req, res) {
     }
 
     // 检查URL是否需要编码
-    let redirectUrl = fileInfo.download_url;
-    try {
-      // 尝试解析URL，如果失败说明需要编码
-      new URL(redirectUrl);
-    } catch (error) {
-      console.log('URL needs encoding:', redirectUrl);
-      // 对URL进行编码，但保留原有的合法字符
-      redirectUrl = encodeURI(redirectUrl);
-      console.log('Encoded URL:', redirectUrl);
-    }
+    let redirectUrl = encodeURI(fileInfo.download_url);
 
     console.log('Redirecting to download URL:', {
       originalUrl: fileInfo.download_url,
