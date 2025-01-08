@@ -1,37 +1,42 @@
 import { memo, useEffect } from 'react';
+import Image from 'next/image';
 import { 
     Card, 
-    CardMedia, 
     CardContent, 
     Typography, 
     CardActions, 
     Button,
     CircularProgress,
     Switch,
-    FormControlLabel
+    FormControlLabel,
+    Box
 } from '@mui/material';
 
 // 创建一个记忆化的 BookCard 组件
 const BookCard = memo(({ book, onDelete, onPreview, onUnlistChange, updatingId, getFullUrl }) => {
-    // 预加载图片
-    useEffect(() => {
-        const img = new Image();
-        img.src = getFullUrl(book.coverPath);
-    }, [book.coverPath, getFullUrl]);
-
     return (
         <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <CardMedia
-                component="img"
+            <Box
                 sx={{ 
                     height: 200, 
-                    objectFit: 'contain',
-                    bgcolor: 'grey.50'
+                    position: 'relative',
+                    bgcolor: 'grey.50',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                 }}
-                image={getFullUrl(book.coverPath)}
-                loading="lazy"
-                alt={book.title}
-            />
+            >
+                <Image
+                    src={getFullUrl(book.coverPath)}
+                    alt={book.title}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    style={{ 
+                        objectFit: 'contain',
+                    }}
+                    priority={false}
+                />
+            </Box>
             <CardContent sx={{ flexGrow: 1 }}>
                 <Typography gutterBottom variant="h6">
                     {book.title}
