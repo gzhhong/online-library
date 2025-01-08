@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const { email, password } = req.body;
 
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-      const token = generateToken({ email });
+      const token = generateToken({ isAdmin: true });
       
       // 设置cookie
       res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Max-Age=${30 * 60}`);
