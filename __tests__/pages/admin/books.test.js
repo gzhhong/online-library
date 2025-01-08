@@ -53,7 +53,7 @@ describe('Books Page', () => {
     test('搜索期刊功能', async () => {
         render(<Books />);
         
-        const searchInput = screen.getByPlaceholderText('搜索期刊...');
+        const searchInput = screen.getByPlaceholderText('查询期刊，支持复合查询，如：2024年第10期意林');
         
         // 等待初始期刊列表加载
         await waitFor(() => {
@@ -172,7 +172,7 @@ describe('Books Page', () => {
     test('搜索、下架和清空搜索的组合操作', async () => {
         render(<Books />);
         
-        const searchInput = screen.getByPlaceholderText('搜索期刊...');
+        const searchInput = screen.getByPlaceholderText('查询期刊，支持复合查询，如：2024年第10期意林');
         
         // 等待初始期刊列表加载
         await waitFor(() => {
@@ -241,7 +241,7 @@ describe('Books Page', () => {
 
         render(<Books />);
         
-        const searchInput = screen.getByPlaceholderText('搜索期刊...');
+        const searchInput = screen.getByPlaceholderText('查询期刊，支持复合查询，如：2024年第10期意林');
         
         // 等待初始期刊列表加载
         await waitFor(() => {

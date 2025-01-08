@@ -65,7 +65,10 @@ describe('File Path API', () => {
       id: 1,
       title: 'Test Book',
       accessLevel: 3,
-      pdfPath: '/books/test.pdf'
+      coverPath: '/covers/test.jpg',
+      pdfPath: '/books/test.pdf',
+      coverFileId: 'cloud://test-env.covers/test.jpg',
+      pdfFileId: 'cloud://test-env.books/test.pdf'
     };
 
     const mockDownloadUrl = 'https://example.com/download/test.pdf';
@@ -77,7 +80,7 @@ describe('File Path API', () => {
       data: {
         errcode: 0,
         file_list: [{
-          fileid: 'test-file-id',
+          fileid: mockBook.pdfFileId,  // 使用mock数据中的fileId
           download_url: mockDownloadUrl,
           status: 0
         }]
@@ -106,6 +109,18 @@ describe('File Path API', () => {
         ]
       }
     });
+    // 验证使用了正确的fileId调用微信API
+    expect(axios.post).toHaveBeenCalledWith(
+      'http://api.weixin.qq.com/tcb/batchdownloadfile',
+      {
+        env: process.env.CLOUD_ENV_ID,
+        file_list: [{
+          fileid: mockBook.pdfFileId,  // 应该使用PDF的fileId
+          max_age: 3600
+        }]
+      },
+      expect.any(Object)
+    );
   });
 
   test('普通用户访问权限不足的文件时返回403', async () => {
@@ -178,7 +193,10 @@ describe('File Path API', () => {
       id: 1,
       title: 'Test Book',
       accessLevel: 1,
-      pdfPath: '/books/test.pdf'
+      pdfPath: '/books/test.pdf',
+      coverPath: '/covers/test.jpg',
+      coverFileId: 'cloud://test-env.covers/test.jpg',
+      pdfFileId: 'cloud://test-env.books/test.pdf'
     };
 
     const mockDownloadUrl = 'https://example.com/download/test.pdf';
@@ -189,7 +207,7 @@ describe('File Path API', () => {
       data: {
         errcode: 0,
         file_list: [{
-          fileid: 'test-file-id',
+          fileid: mockBook.pdfFileId,
           download_url: mockDownloadUrl,
           status: 0
         }]
@@ -208,15 +226,106 @@ describe('File Path API', () => {
     expect(res._getStatusCode()).toBe(302);
     expect(res._getRedirectUrl()).toBe(mockDownloadUrl);
     expect(axios.post).toHaveBeenCalledWith(
-      'https://api.weixin.qq.com/tcb/batchdownloadfile',
-      expect.objectContaining({
-        env: process.env.WEIXIN_ENV_ID,
+      'http://api.weixin.qq.com/tcb/batchdownloadfile',
+      {
+        env: process.env.CLOUD_ENV_ID,
         file_list: [{
-          fileid: expect.stringContaining('cloud://'),
+          fileid: mockBook.pdfFileId,
           max_age: 3600
         }]
-      }),
+      },
       expect.any(Object)
     );
   });
+
+  test('成功获取封面图片下载链接', async () => {
+    const mockBook = {
+      id: 1,
+      title: 'Test Book',
+      accessLevel: 1,
+      coverPath: '/covers/test.jpg',
+      pdfPath: '/books/test.pdf',
+      coverFileId: 'cloud://test-env.covers/test.jpg',
+      pdfFileId: 'cloud://test-env.books/test.pdf'
+    };
+
+    const mockDownloadUrl = 'https://example.com/download/test.jpg';
+
+    prisma.book.findFirst.mockResolvedValue(mockBook);
+    verifyToken.mockReturnValue(false);
+    axios.post.mockResolvedValue({
+      data: {
+        errcode: 0,
+        file_list: [{
+          fileid: mockBook.coverFileId,
+          download_url: mockDownloadUrl,
+          status: 0
+        }]
+      }
+    });
+
+    const { req, res } = createMocks({
+      method: 'GET',
+      query: {
+        path: ['covers', 'test.jpg']
+      }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(302);
+    expect(res._getRedirectUrl()).toBe(mockDownloadUrl);
+    expect(axios.post).toHaveBeenCalledWith(
+      'http://api.weixin.qq.com/tcb/batchdownloadfile',
+      {
+        env: process.env.CLOUD_ENV_ID,
+        file_list: [{
+          fileid: mockBook.coverFileId,  // 应该使用封面的fileId
+          max_age: 3600
+        }]
+      },
+      expect.any(Object)
+    );
+  });
+
+  test('处理包含中文的下载链接', async () => {
+    const mockBook = {
+      id: 1,
+      title: 'Test Book',
+      accessLevel: 1,
+      coverPath: '/covers/测试.jpg',
+      pdfPath: '/books/test.pdf',
+      coverFileId: 'cloud://test-env.covers/测试.jpg',
+      pdfFileId: 'cloud://test-env.books/test.pdf'
+    };
+
+    const mockDownloadUrl = 'https://example.com/download/测试文件.jpg';
+    const expectedEncodedUrl = 'https://example.com/download/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6.jpg';
+
+    prisma.book.findFirst.mockResolvedValue(mockBook);
+    verifyToken.mockReturnValue(false);
+    axios.post.mockResolvedValue({
+      data: {
+        errcode: 0,
+        file_list: [{
+          fileid: mockBook.coverFileId,
+          download_url: mockDownloadUrl,
+          status: 0
+        }]
+      }
+    });
+
+    const { req, res } = createMocks({
+      method: 'GET',
+      query: {
+        path: ['covers', '测试.jpg']
+      }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(302);
+    expect(res._getRedirectUrl()).toBe(expectedEncodedUrl);
+  });
+
 }); 
