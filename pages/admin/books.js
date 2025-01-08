@@ -169,46 +169,33 @@ export default function Books() {
     return (
         <Layout>
             <div className="container mx-auto px-4 py-8">
-                <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center flex-1">
-                        <h1 className="text-3xl font-bold text-gray-800 mr-4">期刊管理</h1>
-                        <Box sx={{ 
-                            display: 'flex', 
-                            justifyContent: 'flex-end', 
-                            alignItems: 'center',
-                            gap: 2,  // 元素之间的间距
-                            mb: 2 
-                        }}>
-                            <TextField
-                                placeholder="搜索期刊..."
-                                value={searchText}
-                                onChange={handleSearch}
-                                size="small"
-                                sx={{ 
-                                    width: 300,
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: 'white'
-                                    }
-                                }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon color="action" />
-                                        </InputAdornment>
-                                    )
-                                }}
-                                helperText="支持年份、期数和关键词组合搜索，如：2024年第10期意林"
-                            />
-                            <Link href="/admin/upload" passHref>
-                                <Button 
-                                    variant="contained" 
-                                    startIcon={<UploadIcon />}
-                                >
-                                    上传新期刊
-                                </Button>
-                            </Link>
-                        </Box>
-                    </div>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    marginBottom: '32px' 
+                }}>
+                    <span style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#1f2937' }}>期刊管理</span>
+                    <TextField
+                        placeholder="查询期刊，支持复合查询，如：2024年第10期意林"
+                        value={searchText}
+                        onChange={handleSearch}
+                        size="small"
+                        sx={{ 
+                            width: '100%',
+                            maxWidth: '450px',
+                            '&.MuiOutlinedInput-root': {
+                                backgroundColor: 'white'
+                            }
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon color="action" />
+                                </InputAdornment>
+                            )
+                        }}
+                    />
                 </div>
 
                 {loading ? (
