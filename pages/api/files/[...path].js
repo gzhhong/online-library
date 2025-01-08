@@ -60,9 +60,18 @@ export default async function handler(req, res) {
       }
     }
 
-    // 构造文件ID
-    const cloudPath = fileUrlPath;
-    const fileId = `cloud://${process.env.COS_BUCKET}.${cloudPath}`;
+    // 根据请求的路径确定使用哪个文件ID
+    const fileId = fileUrlPath === book.coverPath 
+      ? book.coverFileId 
+      : book.pdfFileId;
+    
+    console.log('Using file ID:', {
+      requestPath: fileUrlPath,
+      coverPath: book.coverPath,
+      pdfPath: book.pdfPath,
+      selectedFileId: fileId
+    });
+
     console.log('Requesting file download:', { 
       fileId,
       env: process.env.WEIXIN_ENV_ID 
@@ -70,9 +79,9 @@ export default async function handler(req, res) {
 
     // 调用微信云存储接口获取下载链接
     const response = await axios.post(
-      'https://api.weixin.qq.com/tcb/batchdownloadfile',
+      'http://api.weixin.qq.com/tcb/batchdownloadfile',
       {
-        env: process.env.WEIXIN_ENV_ID,
+        env: process.env.CLOUD_ENV_ID,
         file_list: [{
           fileid: fileId,
           max_age: 3600  // 链接有效期1小时

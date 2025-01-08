@@ -19,6 +19,8 @@ export default function Upload() {
     const [accessLevel, setAccessLevel] = useState(0);
     const [cover, setCover] = useState(null);
     const [pdf, setPdf] = useState(null);
+    const [coverFileId, setCoverFileId] = useState(null);
+    const [pdfFileId, setPdfFileId] = useState(null);
     const [year, setYear] = useState('');
     const [issue, setIssue] = useState('');
     const [description, setDescription] = useState('');
@@ -78,6 +80,8 @@ export default function Upload() {
             
             if (!coverUploadRes.ok) throw new Error('获取封面上传链接失败');
             const coverUploadData = await coverUploadRes.json();
+            // 保存封面的 file_id
+            setCoverFileId(coverUploadData.file_id);
             console.log('Got cover upload URL:', coverUploadData.url);
 
             // 上传封面到COS
@@ -87,6 +91,7 @@ export default function Upload() {
             coverFormData.append('x-cos-security-token', coverUploadData.token);
             coverFormData.append('x-cos-meta-fileid', coverUploadData.cos_file_id);
             coverFormData.append('file', cover);
+            
 
             const coverCosRes = await fetch(coverUploadData.url, {
                 method: 'POST',
@@ -110,6 +115,8 @@ export default function Upload() {
 
             if (!pdfUploadRes.ok) throw new Error('获取PDF上传链接失败');
             const pdfUploadData = await pdfUploadRes.json();
+            // 保存PDF的 file_id
+            setPdfFileId(pdfUploadData.file_id);
             console.log('Got PDF upload URL:', pdfUploadData.url);
 
             // 上传PDF到COS
@@ -138,6 +145,8 @@ export default function Upload() {
                     accessLevel,
                     coverPath,
                     pdfPath,
+                    coverFileId,
+                    pdfFileId,
                     year: year ? parseInt(year) : null,
                     issue: issue ? parseInt(issue) : null,
                     description: description || null
@@ -155,6 +164,8 @@ export default function Upload() {
             setAccessLevel(0);
             setCover(null);
             setPdf(null);
+            setCoverFileId(null);
+            setPdfFileId(null);
             setYear('');
             setIssue('');
             setDescription('');

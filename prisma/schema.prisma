@@ -13,6 +13,8 @@ model Book {
   accessLevel Int      @default(0)
   coverPath   String
   pdfPath     String
+  coverFileId String   // 封面文件的云存储ID
+  pdfFileId   String   // PDF文件的云存储ID
   unlist      Boolean  @default(false)
   createdAt   DateTime @default(now())
   year        Int?

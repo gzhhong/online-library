@@ -21,6 +21,8 @@ export default async function handler(req, res) {
       accessLevel, 
       coverPath, 
       pdfPath,
+      coverFileId,
+      pdfFileId,
       year,
       issue,
       description 
@@ -44,6 +46,8 @@ export default async function handler(req, res) {
         accessLevel: parseInt(accessLevel),
         coverPath: normalizedCoverPath,  // 存入数据库的路径需要以'/'开头
         pdfPath: normalizedPdfPath,      // 存入数据库的路径需要以'/'开头
+        coverFileId,                 // 保存文件ID
+        pdfFileId,                   // 保存文件ID
         year: year ? parseInt(year) : null,
         issue: issue ? parseInt(issue) : null,
         description: description || null
