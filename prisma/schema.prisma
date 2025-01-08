@@ -15,6 +15,9 @@ model Book {
   pdfPath     String
   unlist      Boolean  @default(false)
   createdAt   DateTime @default(now())
+  year        Int?
+  issue       Int?
+  description String?  @db.VarChar(512)
 }
 
 model User {

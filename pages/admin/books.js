@@ -205,14 +205,16 @@ export default function Books() {
                                         alt={book.title}
                                     />
                                     <CardContent sx={{ flexGrow: 1 }}>
-                                        <Typography gutterBottom variant="subtitle1" component="div" noWrap>
+                                        <Typography gutterBottom variant="h6">
                                             {book.title}
                                         </Typography>
+                                        {book.year && book.issue && (
+                                            <Typography variant="body2" color="text.secondary">
+                                                {book.year}年 第{book.issue}期
+                                            </Typography>
+                                        )}
                                         <Typography variant="body2" color="text.secondary">
-                                            访问级别：{book.accessLevel}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary" display="block">
-                                            {new Date(book.createdAt).toLocaleString()}
+                                            访问权限: {book.accessLevel}
                                         </Typography>
                                     </CardContent>
                                     <CardActions sx={{ justifyContent: 'flex-end' }}>

@@ -36,6 +36,9 @@ export default async function handler(req, res) {
         accessLevel: parseInt(accessLevel),
         coverPath: normalizedCoverPath,  // 存入数据库的路径需要以'/'开头
         pdfPath: normalizedPdfPath,      // 存入数据库的路径需要以'/'开头
+        year: req.body.year ? parseInt(req.body.year) : null,
+        issue: req.body.issue ? parseInt(req.body.issue) : null,
+        description: req.body.description || null,
       }
     });
 

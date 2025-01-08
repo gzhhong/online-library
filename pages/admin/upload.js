@@ -19,8 +19,18 @@ export default function Upload() {
     const [accessLevel, setAccessLevel] = useState(0);
     const [cover, setCover] = useState(null);
     const [pdf, setPdf] = useState(null);
+    const [year, setYear] = useState('');
+    const [issue, setIssue] = useState('');
+    const [description, setDescription] = useState('');
     const [status, setStatus] = useState({ type: '', message: '' });
     const [loading, setLoading] = useState(false);
+
+    // 计算字符长度：中文算2个字符，英文和其他字符算1个字符
+    const getCharLength = (str) => {
+        return str.split('').reduce((len, char) => {
+            return len + (/[\u4e00-\u9fa5]/.test(char) ? 2 : 1);
+        }, 0);
+    };
 
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB in bytes
 
@@ -138,6 +148,9 @@ export default function Upload() {
             setAccessLevel(0);
             setCover(null);
             setPdf(null);
+            setYear('');
+            setIssue('');
+            setDescription('');
         } catch (error) {
             console.error('Upload process failed:', {
                 error: error.message,
@@ -152,7 +165,7 @@ export default function Upload() {
 
     return (
         <Layout>
-            <Paper elevation={3} sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
+            <Paper elevation={3} sx={{ p: 4, maxWidth: 800, mx: 'auto' }}>
                 <Typography variant="h5" gutterBottom>
                     上传新期刊
                 </Typography>
@@ -171,21 +184,85 @@ export default function Upload() {
                         required
                         disabled={loading}
                     />
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>访问权限</InputLabel>
-                        <Select
-                            value={accessLevel}
-                            label="访问权限"
-                            onChange={(e) => setAccessLevel(e.target.value)}
-                            disabled={loading}
+                    <Box sx={{ 
+                        display: 'flex', 
+                        gap: 2, 
+                        alignItems: 'flex-start',
+                        mt: 2,
+                        mb: 1,
+                        width: '100%'
+                    }}>
+                        <TextField
+                            label="年份"
+                            sx={{ flex: 1 }}
+                            value={year}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === '' || (/^\d{0,4}$/.test(val))) {
+                                    setYear(val);
+                                }
+                            }}
+                            inputProps={{ 
+                                inputMode: 'numeric',
+                                pattern: '\\d{4}'
+                            }}
+                            helperText="请输入4位数字年份"
+                        />
+                        <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            flex: 1
+                        }}>
+                            <Typography sx={{ mr: 1 }}>第</Typography>
+                            <TextField
+                                value={issue}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || (/^\d{1,2}$/.test(val) && parseInt(val) > 0)) {
+                                        setIssue(val);
+                                    }
+                                }}
+                                inputProps={{ 
+                                    inputMode: 'numeric',
+                                    pattern: '\\d{1,2}'
+                                }}
+                                sx={{ flex: 1 }}
+                            />
+                            <Typography sx={{ ml: 1 }}>期</Typography>
+                        </Box>
+                        <FormControl
+                            sx={{ flex: 1 }}
                         >
-                            {[0, 1, 2, 3, 4, 5].map((level) => (
-                                <MenuItem key={level} value={level}>
-                                    {level}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                            <InputLabel>访问权限</InputLabel>
+                            <Select
+                                value={accessLevel}
+                                label="访问权限"
+                                onChange={(e) => setAccessLevel(e.target.value)}
+                                disabled={loading}
+                            >
+                                {[0, 1, 2, 3, 4, 5].map((level) => (
+                                    <MenuItem key={level} value={level}>
+                                        {level}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <TextField
+                        fullWidth
+                        label="简介"
+                        margin="normal"
+                        value={description}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            if (getCharLength(val) <= 256) {
+                                setDescription(val);
+                            }
+                        }}
+                        multiline
+                        rows={4}
+                        helperText={`${getCharLength(description)}/256`}
+                    />
                     <Box sx={{ mt: 2 }}>
                         <input
                             accept="image/*"
