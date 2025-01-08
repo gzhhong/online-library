@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     }
 
     console.log('Redirecting to download URL:', {
-      url: fileInfo.download_url.substring(0, 50) + '...' // 只显示URL的前50个字符
+      url: fileInfo.download_url// 只显示URL的前50个字符
     });
 
     // 重定向到临时链接
