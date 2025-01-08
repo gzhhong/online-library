@@ -162,8 +162,6 @@ export default function Upload() {
             setAccessLevel(0);
             setCover(null);
             setPdf(null);
-            setCoverFileId(null);
-            setPdfFileId(null);
             setYear('');
             setIssue('');
             setDescription('');
