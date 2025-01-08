@@ -13,11 +13,17 @@ export default async function handler(req, res) {
   try {
     // 验证管理员权限
     const token = req.cookies.token;
+    console.log('Token from cookies:', { token });
+
     const isAdmin = token && verifyToken(token);
-    console.log('Admin check:', { isAdmin });
+    console.log('Admin check:', { 
+      hasToken: !!token,
+      verifyResult: token ? verifyToken(token) : null,
+      isAdmin 
+    });
 
     // 构建文件URL路径
-    const fileUrlPath = path.join('/');
+    const fileUrlPath = '/' + path.join('/');
     console.log('Constructed file path:', fileUrlPath);
 
     // 查找对应的期刊记录
