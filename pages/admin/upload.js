@@ -19,8 +19,6 @@ export default function Upload() {
     const [accessLevel, setAccessLevel] = useState(0);
     const [cover, setCover] = useState(null);
     const [pdf, setPdf] = useState(null);
-    const [coverFileId, setCoverFileId] = useState(null);
-    const [pdfFileId, setPdfFileId] = useState(null);
     const [year, setYear] = useState('');
     const [issue, setIssue] = useState('');
     const [description, setDescription] = useState('');
@@ -81,7 +79,7 @@ export default function Upload() {
             if (!coverUploadRes.ok) throw new Error('获取封面上传链接失败');
             const coverUploadData = await coverUploadRes.json();
             // 保存封面的 file_id
-            setCoverFileId(coverUploadData.file_id);
+            const coverFileId = coverUploadData.file_id;
             console.log('Got cover upload URL:', coverUploadData.url);
 
             // 上传封面到COS
@@ -116,7 +114,7 @@ export default function Upload() {
             if (!pdfUploadRes.ok) throw new Error('获取PDF上传链接失败');
             const pdfUploadData = await pdfUploadRes.json();
             // 保存PDF的 file_id
-            setPdfFileId(pdfUploadData.file_id);
+            const pdfFileId = pdfUploadData.file_id;
             console.log('Got PDF upload URL:', pdfUploadData.url);
 
             // 上传PDF到COS
