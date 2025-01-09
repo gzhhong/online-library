@@ -10,6 +10,8 @@ export default async function handler(req, res) {
   try {
     const { nickName, searchText } = req.query;
     // 只有当 searchText 存在且不为空字符串时才解析搜索条件
+    console.log('searchText', searchText);
+    console.log('nickName', nickName);
     const searchConditions = searchText?.trim() 
       ? parseSearchText(searchText)
       : { 
@@ -44,6 +46,7 @@ export default async function handler(req, res) {
       userAccessLevel = user.accessLevel;
     } else {
       // 记录访问日志
+      console.log('create accessLog for new user', nickName);
       let accessLog = await prisma.accessLog.findUnique({
         where: { nickName }
       });
