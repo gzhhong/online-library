@@ -30,7 +30,8 @@ describe('parseSearchText', () => {
         // 纯数字年份
         expect(parseSearchText('2024')).toEqualExactlyOnce([
             { key: 'time', value: '202401', opt: 'gte' },
-            { key: 'time', value: '202412', opt: 'lte' }        ]);
+            { key: 'time', value: '202412', opt: 'lte' }        
+        ]);
         
         // 带有语气词的年份
         expect(parseSearchText('请帮我找2024年的期刊')).toEqualExactlyOnce([

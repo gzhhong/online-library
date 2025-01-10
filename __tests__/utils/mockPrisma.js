@@ -13,6 +13,9 @@ export const createMockPrisma = () => {
         let results = [...mockDB.books];
         
         if (query.where) {
+          console.log('=== Query Debug Info ===');
+          console.log('1. Query:', JSON.stringify(query, null, 2));
+          console.log('=====================');
           // 基本过滤条件
           if (query.where.unlist === false) {
             results = results.filter(book => !book.unlist);
@@ -47,22 +50,24 @@ export const createMockPrisma = () => {
           // AND 条件
           if (query.where.AND) {
             query.where.AND.forEach(condition => {
-              // 处理 OR 条件（时间范围）
+              // 处理时间条件
+              if ('time' in condition) {
+                if (typeof condition.time === 'number') {
+                  results = results.filter(book => book.time === condition.time);
+                } else {
+                  if (condition.time.gte) {
+                    results = results.filter(book => book.time >= condition.time.gte);
+                  }
+                  if (condition.time.lte) {
+                    results = results.filter(book => book.time <= condition.time.lte);
+                  }
+                }
+              }
+
+              // 处理 OR 条件（标题和描述搜索）
               if (condition.OR) {
                 results = results.filter(book => 
                   condition.OR.some(orCondition => {
-                    // 处理时间条件
-                    if ('time' in orCondition) {
-                      if (typeof orCondition.time === 'number') {
-                        return book.time === orCondition.time;
-                      }
-                      if (orCondition.time?.gte) {
-                        return book.time >= orCondition.time.gte;
-                      }
-                      if (orCondition.time?.lte) {
-                        return book.time <= orCondition.time.lte;
-                      }
-                    }
                     // 处理标题和描述搜索
                     if ('title' in orCondition || 'description' in orCondition) {
                       if (orCondition.title?.contains) {
@@ -102,6 +107,30 @@ export const createMockPrisma = () => {
       }),
       createMany: jest.fn(async ({data}) => {
         mockDB.books.push(...data);
+      }),
+      findFirst: jest.fn(async (query) => {
+        let results = [...mockDB.books];
+        
+        if (query.where) {
+          // 处理 OR 条件
+          if (query.where.OR) {
+            results = results.filter(book => 
+              query.where.OR.some(condition => {
+                if (condition.coverPath) {
+                  return book.coverPath === condition.coverPath;
+                }
+                if (condition.pdfPath) {
+                  return book.pdfPath === condition.pdfPath;
+                }
+                return false;
+              })
+            );
+          }
+
+          // 处理其他条件...
+        }
+
+        return results[0] || null;
       })
     },
     user: {

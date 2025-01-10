@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     // 处理搜索条件
     if (searchText?.trim()) {
       const searchConditions = parseSearchText(searchText);
-      
+      console.log(searchConditions);
       // 如果解析出错，返回空结果
       if (searchConditions.error) {
         return res.status(200).json([]);
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       // 组合所有条件
       if (timeConditions.length > 0 || accessLevelCondition || titleCondition) {
         whereClause.AND = [
-          ...(timeConditions.length > 0 ? [{ OR: timeConditions }] : []),
+          ...timeConditions,
           ...(accessLevelCondition ? [accessLevelCondition] : []),
           ...(titleCondition ? [titleCondition] : [])
         ];
@@ -128,6 +128,11 @@ export default async function handler(req, res) {
 
     // 添加访问权限过滤
     whereClause.accessLevel = { lte: userAccessLevel };
+
+    console.log('=== Search Debug Info ===');
+    console.log('1. Raw search text:', searchText);
+    console.log('6. Final whereClause:', JSON.stringify(whereClause, null, 2));
+    console.log('=====================');
 
     const books = await prisma.book.findMany({
       where: whereClause,

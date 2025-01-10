@@ -271,4 +271,53 @@ describe('Books API', () => {
     });
     expect(JSON.parse(res._getData())).toEqual(sortedBooks);
   });
+
+  test('搜索：2024年只返回2024年的期刊', async () => {
+    const testBooks = [
+      { 
+        title: '期刊1', 
+        year: 2023, 
+        issue: 12, 
+        time: 202312,
+        unlist: false, 
+        accessLevel: 0 
+      },
+      { 
+        title: '期刊2', 
+        year: 2024, 
+        issue: 3, 
+        time: 202403,
+        unlist: false, 
+        accessLevel: 0 
+      },
+      { 
+        title: '期刊3', 
+        year: 2024, 
+        issue: 5, 
+        time: 202405,
+        unlist: false, 
+        accessLevel: 0 
+      }
+    ];
+    addMockData.books(testBooks);
+
+    const { req, res } = createMocks({
+      method: 'GET',
+      query: {
+        nickName: 'testUser',
+        searchText: '2024'
+      }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(200);
+    const books = JSON.parse(res._getData());
+    expect(books).toHaveLength(2);  // 只应该返回2024年的两本期刊
+    expect(books.every(book => book.year === 2024)).toBe(true);  // 确保所有返回的期刊都是2024年的
+    expect(books).toEqual(expect.arrayContaining([
+      expect.objectContaining({ time: 202403 }),
+      expect.objectContaining({ time: 202405 })
+    ]));
+  });
 }); 

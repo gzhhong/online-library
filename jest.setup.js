@@ -15,3 +15,7 @@ jest.mock('@/components/Layout', () => {
         return React.createElement('div', null, children);
     };
 }); 
+
+const { createMockPrisma } = require('./__tests__/utils/mockPrisma');
+const { prisma } = createMockPrisma();
+global.prisma = prisma; // Make `prisma` globally available

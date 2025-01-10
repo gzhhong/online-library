@@ -77,7 +77,10 @@ export default function Books() {
                         break;
 
                     case 'keywords':
-                        matches = matches && book.title.toLowerCase().includes(condition.value.toLowerCase());
+                        matches = matches && (
+                            book.title.toLowerCase().includes(condition.value.toLowerCase()) ||
+                            (book.description && book.description.toLowerCase().includes(condition.value.toLowerCase()))
+                        );
                         break;
 
                     // 暂时忽略 type
