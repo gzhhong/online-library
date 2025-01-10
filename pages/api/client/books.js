@@ -1,34 +1,88 @@
-import prisma from '@/lib/db';
+import { prisma } from '@/lib/db';
 import { parseSearchText } from '@/lib/searchUtils';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
-  console.log('just in the handler of api/client/books');
 
   try {
-    const { nickName, searchText } = req.query;
-    // 只有当 searchText 存在且不为空字符串时才解析搜索条件
-    console.log('searchText', searchText);
-    console.log('nickName', nickName);
-    const searchConditions = searchText?.trim() 
-      ? parseSearchText(searchText)
-      : { 
-        year: null, 
-        issue: null, 
-        keyword: null, 
-        accessLevel: null, 
-        accessLevelOp: null 
-      };
-    
-    const { 
-      year, 
-      issue, 
-      keyword, 
-      accessLevel: searchAccessLevel,  // 重命名以避免冲突
-      accessLevelOp 
-    } = searchConditions;
+    const { searchText, nickName } = req.query;
+    let whereClause = {
+      unlist: false  // 基础条件：不显示下架的期刊
+    };
+
+    // 处理搜索条件
+    if (searchText?.trim()) {
+      const searchConditions = parseSearchText(searchText);
+      
+      // 如果解析出错，返回空结果
+      if (searchConditions.error) {
+        return res.status(200).json([]);
+      }
+
+      // 处理所有搜索条件
+      const timeConditions = [];
+      let accessLevelCondition = null;
+      let titleCondition = null;
+
+      searchConditions.forEach(condition => {
+        switch (condition.key) {
+          case 'time':
+            // 收集所有时间条件
+            switch (condition.opt) {
+              case 'eq':
+                timeConditions.push({ time: parseInt(condition.value) });
+                break;
+              case 'gte':
+                timeConditions.push({ time: { gte: parseInt(condition.value) } });
+                break;
+              case 'lte':
+                timeConditions.push({ time: { lte: parseInt(condition.value) } });
+                break;
+            }
+            break;
+
+          case 'accessLevel':
+            // 处理访问权限条件
+            switch (condition.opt) {
+              case 'eq':
+                accessLevelCondition = { accessLevel: condition.value };
+                break;
+              case 'gte':
+                accessLevelCondition = { accessLevel: { gte: condition.value } };
+                break;
+              case 'lte':
+                accessLevelCondition = { accessLevel: { lte: condition.value } };
+                break;
+            }
+            break;
+
+          case 'keywords':
+            // 处理关键词搜索
+            titleCondition = {
+              OR: [
+                { title: { contains: condition.value } },
+                { description: { contains: condition.value } }
+              ]
+            };
+            break;
+
+          // 暂时忽略 type 条件
+          case 'type':
+            break;
+        }
+      });
+
+      // 组合所有条件
+      if (timeConditions.length > 0 || accessLevelCondition || titleCondition) {
+        whereClause.AND = [
+          ...(timeConditions.length > 0 ? [{ OR: timeConditions }] : []),
+          ...(accessLevelCondition ? [accessLevelCondition] : []),
+          ...(titleCondition ? [titleCondition] : [])
+        ];
+      }
+    }
 
     // 更新用户最后访问时间
     let user = await prisma.user.findUnique({
@@ -72,59 +126,20 @@ export default async function handler(req, res) {
       }
     }
 
-    // 构建查询条件
-    const where = {
-      unlist: false, // 只返回未下架的期刊
-      accessLevel: { lte: userAccessLevel }  // 用户只能看到自己权限范围内的期刊
-    };
-
-    if (year) {
-      where.year = year;
-    }
-
-    if (issue) {
-      where.issue = issue;
-    }
-
-    // 处理访问权限条件
-    if (searchAccessLevel !== null) {
-      switch (accessLevelOp) {
-        case 'gte':
-          where.accessLevel = { 
-            gte: searchAccessLevel,
-            lte: userAccessLevel  // 保持在用户权限范围内
-          };
-          break;
-        case 'lte':
-          where.accessLevel = { 
-            lte: Math.min(searchAccessLevel, userAccessLevel)  // 取较小值
-          };
-          break;
-        case 'eq':
-        default:
-          if (searchAccessLevel <= userAccessLevel) {
-            where.accessLevel = searchAccessLevel;
-          }
-      }
-    }
-
-    if (keyword) {
-      where.OR = [
-        { title: { contains: keyword } },
-        { description: { contains: keyword } }
-      ];
-    }
+    // 添加访问权限过滤
+    whereClause.accessLevel = { lte: userAccessLevel };
 
     const books = await prisma.book.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc'
-      }
+      where: whereClause,
+      orderBy: [
+        { year: 'desc' },
+        { issue: 'desc' }
+      ]
     });
 
     res.status(200).json(books);
   } catch (error) {
-    console.error(error);
+    console.error('Error in books API:', error);
     res.status(500).json({ message: error.message });
   }
 } 

@@ -291,4 +291,138 @@ describe('Books Page', () => {
         });
     });
 
+    test('按时间搜索期刊功能', async () => {
+        // Mock 期刊数据
+        const mockBooks = [
+            { id: 1, title: '期刊1', year: 2024, issue: 1, time: 202401 },
+            { id: 2, title: '期刊2', year: 2024, issue: 3, time: 202403 },
+            { id: 3, title: '期刊3', year: 2024, issue: 5, time: 202405 },
+            { id: 4, title: '期刊4', year: 2023, issue: 12, time: 202312 },
+        ];
+        
+        // Mock API 响应
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve(mockBooks)
+            })
+        );
+
+        render(<Books />);
+        
+        const searchInput = screen.getByPlaceholderText('查询期刊，支持复合查询，如：2024年第10期意林');
+        
+        // 等待初始期刊列表加载
+        await waitFor(() => {
+            expect(screen.getByText('期刊1')).toBeInTheDocument();
+            expect(screen.getByText('期刊4')).toBeInTheDocument();
+        });
+
+        // 测试具体年月
+        await userEvent.clear(searchInput);
+        await userEvent.type(searchInput, '2024年3月');
+        await waitFor(() => {
+            expect(screen.getByText('期刊2')).toBeInTheDocument();
+            expect(screen.queryByText('期刊1')).not.toBeInTheDocument();
+            expect(screen.queryByText('期刊3')).not.toBeInTheDocument();
+            expect(screen.queryByText('期刊4')).not.toBeInTheDocument();
+        });
+
+        // 测试时间范围（同年）
+        await userEvent.clear(searchInput);
+        await userEvent.type(searchInput, '2024年1-3月');
+        await waitFor(() => {
+            expect(screen.getByText('期刊1')).toBeInTheDocument();
+            expect(screen.getByText('期刊2')).toBeInTheDocument();
+            expect(screen.queryByText('期刊3')).not.toBeInTheDocument();
+            expect(screen.queryByText('期刊4')).not.toBeInTheDocument();
+        });
+
+        // 测试时间范围（跨年）
+        await userEvent.clear(searchInput);
+        await userEvent.type(searchInput, '2023年12月-2024年3月');
+        await waitFor(() => {
+            expect(screen.getByText('期刊1')).toBeInTheDocument();
+            expect(screen.getByText('期刊2')).toBeInTheDocument();
+            expect(screen.getByText('期刊4')).toBeInTheDocument();
+            expect(screen.queryByText('期刊3')).not.toBeInTheDocument();
+        });
+
+        // 测试年份
+        await userEvent.clear(searchInput);
+        await userEvent.type(searchInput, '2024年');
+        await waitFor(() => {
+            expect(screen.getByText('期刊1')).toBeInTheDocument();
+            expect(screen.getByText('期刊2')).toBeInTheDocument();
+            expect(screen.getByText('期刊3')).toBeInTheDocument();
+            expect(screen.queryByText('期刊4')).not.toBeInTheDocument();
+        });
+
+        // 测试相对时间
+        await userEvent.clear(searchInput);
+        await userEvent.type(searchInput, '最近3个月');
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        await waitFor(() => {
+            // 这里的断言需要根据当前日期动态判断
+            // 假设当前是2024年3月，那么最近3个月应该包含2024年1-3月的期刊
+            const recentBooks = mockBooks.filter(book => {
+                const bookDate = new Date(Math.floor(book.time / 100), (book.time % 100) - 1);
+                const threeMonthsAgo = new Date(now);
+                threeMonthsAgo.setMonth(now.getMonth() - 3);
+                return bookDate >= threeMonthsAgo && bookDate <= now;
+            });
+            recentBooks.forEach(book => {
+                expect(screen.getByText(book.title)).toBeInTheDocument();
+            });
+        });
+    });
+
+    test('空搜索文本应返回所有数据', async () => {
+        // Mock 期刊数据
+        const mockBooks = [
+            { id: 1, title: '期刊1', year: 2024, issue: 1, time: 202401 },
+            { id: 2, title: '期刊2', year: 2024, issue: 3, time: 202403 },
+            { id: 3, title: '期刊3', year: 2024, issue: 5, time: 202405 },
+            { id: 4, title: '期刊4', year: 2023, issue: 12, time: 202312 },
+        ];
+        
+        // Mock API 响应
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve(mockBooks)
+            })
+        );
+
+        render(<Books />);
+        
+        const searchInput = screen.getByPlaceholderText('查询期刊，支持复合查询，如：2024年第10期意林');
+        
+        // 等待初始期刊列表加载（应显示所有数据）
+        await waitFor(() => {
+            mockBooks.forEach(book => {
+                expect(screen.getByText(book.title)).toBeInTheDocument();
+            });
+        });
+
+        // 测试空字符串
+        await userEvent.clear(searchInput);
+        await userEvent.type(searchInput, '   ');  // 输入空格
+        await waitFor(() => {
+            mockBooks.forEach(book => {
+                expect(screen.getByText(book.title)).toBeInTheDocument();
+            });
+        });
+
+        // 测试清空搜索框
+        await userEvent.clear(searchInput);
+        await waitFor(() => {
+            mockBooks.forEach(book => {
+                expect(screen.getByText(book.title)).toBeInTheDocument();
+            });
+        });
+    });
+
 }); 

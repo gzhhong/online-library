@@ -6,9 +6,8 @@ const mockDB = {
 };
 
 // 创建模拟 Prisma 客户端
-const createMockPrisma = () => ({
-  __esModule: true,
-  default: {
+export const createMockPrisma = () => {
+  const mockPrismaClient = {
     book: {
       findMany: jest.fn(async (query) => {
         let results = [...mockDB.books];
@@ -19,12 +18,17 @@ const createMockPrisma = () => ({
             results = results.filter(book => !book.unlist);
           }
 
-          // 年份和期号过滤
-          if (query.where.year) {
-            results = results.filter(book => book.year === query.where.year);
-          }
-          if (query.where.issue) {
-            results = results.filter(book => book.issue === query.where.issue);
+          // 时间过滤
+          if (query.where.time) {
+            if (typeof query.where.time === 'number') {
+              results = results.filter(book => book.time === query.where.time);
+            }
+            if (query.where.time.gte) {
+              results = results.filter(book => book.time >= query.where.time.gte);
+            }
+            if (query.where.time.lte) {
+              results = results.filter(book => book.time <= query.where.time.lte);
+            }
           }
 
           // 访问权限过滤
@@ -43,28 +47,36 @@ const createMockPrisma = () => ({
           // AND 条件
           if (query.where.AND) {
             query.where.AND.forEach(condition => {
-              if (condition.accessLevel?.lte) {
-                results = results.filter(book => book.accessLevel <= condition.accessLevel.lte);
-              }
-              if (condition.accessLevel?.gte) {
-                results = results.filter(book => book.accessLevel >= condition.accessLevel.gte);
+              // 处理 OR 条件（时间范围）
+              if (condition.OR) {
+                results = results.filter(book => 
+                  condition.OR.some(orCondition => {
+                    // 处理时间条件
+                    if ('time' in orCondition) {
+                      if (typeof orCondition.time === 'number') {
+                        return book.time === orCondition.time;
+                      }
+                      if (orCondition.time?.gte) {
+                        return book.time >= orCondition.time.gte;
+                      }
+                      if (orCondition.time?.lte) {
+                        return book.time <= orCondition.time.lte;
+                      }
+                    }
+                    // 处理标题和描述搜索
+                    if ('title' in orCondition || 'description' in orCondition) {
+                      if (orCondition.title?.contains) {
+                        return book.title.toLowerCase().includes(orCondition.title.contains.toLowerCase());
+                      }
+                      if (orCondition.description?.contains) {
+                        return book.description?.toLowerCase().includes(orCondition.description.contains.toLowerCase());
+                      }
+                    }
+                    return false;
+                  })
+                );
               }
             });
-          }
-
-          // OR 条件（用于关键词搜索）
-          if (query.where.OR) {
-            results = results.filter(book => 
-              query.where.OR.some(condition => {
-                if (condition.title?.contains) {
-                  return book.title.includes(condition.title.contains);
-                }
-                if (condition.description?.contains) {
-                  return book.description?.includes(condition.description.contains);
-                }
-                return false;
-              })
-            );
           }
         }
 
@@ -93,60 +105,60 @@ const createMockPrisma = () => ({
       })
     },
     user: {
-      findUnique: jest.fn(async ({where}) => {
-        const user = mockDB.users.find(u => u.nickName === where.nickName);
-        return user ? {
-          ...user,
-          lastVisit: new Date(),
-          createdAt: new Date()
-        } : null;
+      findUnique: jest.fn(async ({ where }) => {
+        return mockDB.users.find(u => u.nickName === where.nickName);
       }),
-      update: jest.fn(async ({where, data}) => {
+      update: jest.fn(async ({ where, data }) => {
         const userIndex = mockDB.users.findIndex(u => u.nickName === where.nickName);
-        if (userIndex >= 0) {
-          mockDB.users[userIndex] = { ...mockDB.users[userIndex], ...data };
-          return mockDB.users[userIndex];
-        }
-        return null;
+        if (userIndex === -1) return null;
+        
+        mockDB.users[userIndex] = {
+          ...mockDB.users[userIndex],
+          ...data
+        };
+        return mockDB.users[userIndex];
       })
     },
     accessLog: {
-      findUnique: jest.fn(async ({where}) => {
-        return mockDB.accessLogs.find(log => log.nickName === where.nickName);
+      findUnique: jest.fn(async ({ where }) => {
+        return mockDB.accessLogs.find(l => l.nickName === where.nickName);
       }),
-      create: jest.fn(async ({data}) => {
-        const log = { ...data, id: mockDB.accessLogs.length + 1 };
-        mockDB.accessLogs.push(log);
-        return log;
+      update: jest.fn(async ({ where, data }) => {
+        const logIndex = mockDB.accessLogs.findIndex(l => l.nickName === where.nickName);
+        if (logIndex === -1) return null;
+        
+        mockDB.accessLogs[logIndex] = {
+          ...mockDB.accessLogs[logIndex],
+          ...data,
+          visitCount: data.visitCount?.increment 
+            ? mockDB.accessLogs[logIndex].visitCount + 1 
+            : mockDB.accessLogs[logIndex].visitCount
+        };
+        return mockDB.accessLogs[logIndex];
       }),
-      update: jest.fn(async ({where, data}) => {
-        const logIndex = mockDB.accessLogs.findIndex(log => log.nickName === where.nickName);
-        if (logIndex >= 0) {
-          mockDB.accessLogs[logIndex] = { ...mockDB.accessLogs[logIndex], ...data };
-          return mockDB.accessLogs[logIndex];
-        }
-        return null;
+      create: jest.fn(async ({ data }) => {
+        const newLog = { ...data };
+        mockDB.accessLogs.push(newLog);
+        return newLog;
       })
     }
-  }
-});
+  };
+
+  return {
+    prisma: mockPrismaClient
+  };
+};
 
 // 清理模拟数据
-const clearMockDB = () => {
+export const clearMockDB = () => {
   mockDB.books = [];
   mockDB.users = [];
   mockDB.accessLogs = [];
 };
 
 // 添加测试数据的辅助函数
-const addMockData = {
+export const addMockData = {
   books: (books) => mockDB.books.push(...books),
   users: (users) => mockDB.users.push(...users),
   accessLogs: (logs) => mockDB.accessLogs.push(...logs)
-};
-
-module.exports = {
-  createMockPrisma,
-  clearMockDB,
-  addMockData
 }; 

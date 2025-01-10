@@ -32,44 +32,59 @@ export default function Books() {
         const searchText = e.target.value;
         setSearchText(searchText);
         
-        const { year, issue, keyword, accessLevel, accessLevelOp } = parseSearchText(searchText);
+        const searchResults = parseSearchText(searchText);
+        
+        // 如果返回错误，不进行过滤
+        if (searchResults.error) {
+            return;
+        }
 
         // 过滤图书
         const filtered = allBooks.filter(book => {
             let matches = true;
 
-            // 按年份过滤
-            if (year !== null) {
-                matches = matches && book.year === year;
-            }
-
-            // 按期数过滤
-            if (issue !== null) {
-                matches = matches && book.issue === issue;
-            }
-
-            // 按访问权限过滤
-            if (accessLevel !== null) {
-                switch (accessLevelOp) {
-                    case 'gte':
-                        matches = matches && book.accessLevel >= accessLevel;
+            // 遍历所有搜索条件
+            searchResults.forEach(condition => {
+                switch (condition.key) {
+                    case 'time':
+                        const conditionTime = parseInt(condition.value, 10);
+                        
+                        switch (condition.opt) {
+                            case 'eq':
+                                matches = matches && book.time === conditionTime;
+                                break;
+                            case 'gte':
+                                matches = matches && book.time >= conditionTime;
+                                break;
+                            case 'lte':
+                                matches = matches && book.time <= conditionTime;
+                                break;
+                        }
                         break;
-                    case 'lte':
-                        matches = matches && book.accessLevel <= accessLevel;
+
+                    case 'accessLevel':
+                        switch (condition.opt) {
+                            case 'eq':
+                                matches = matches && book.accessLevel === condition.value;
+                                break;
+                            case 'gte':
+                                matches = matches && book.accessLevel >= condition.value;
+                                break;
+                            case 'lte':
+                                matches = matches && book.accessLevel <= condition.value;
+                                break;
+                        }
                         break;
-                    case 'eq':
-                        matches = matches && book.accessLevel === accessLevel;
+
+                    case 'keywords':
+                        matches = matches && book.title.toLowerCase().includes(condition.value.toLowerCase());
+                        break;
+
+                    // 暂时忽略 type
+                    case 'type':
                         break;
                 }
-            }
-
-            // 按关键词过滤（标题或简介中包含关键词）
-            if (keyword) {
-                const keywordLower = keyword.toLowerCase();
-                const titleMatches = book.title.toLowerCase().includes(keywordLower);
-                const descriptionMatches = book.description?.toLowerCase().includes(keywordLower) || false;
-                matches = matches && (titleMatches || descriptionMatches);
-            }
+            });
 
             return matches;
         });

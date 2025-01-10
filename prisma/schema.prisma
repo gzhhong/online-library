@@ -19,7 +19,8 @@ model Book {
   createdAt   DateTime @default(now())
   year        Int?
   issue       Int?
-  description String?  @db.VarChar(512)
+  time        Int?
+  description String?
 }
 
 model User {

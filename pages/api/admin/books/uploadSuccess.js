@@ -39,6 +39,9 @@ export default async function handler(req, res) {
       normalizedPdfPath
     });
 
+    // 计算time字段
+    const time = year && issue ? parseInt(year) * 100 + parseInt(issue) : null;
+
     // 创建书籍记录
     const book = await prisma.book.create({
       data: {
@@ -50,6 +53,7 @@ export default async function handler(req, res) {
         pdfFileId,                   // 保存文件ID
         year: year ? parseInt(year) : null,
         issue: issue ? parseInt(issue) : null,
+        time,                        // 新增字段
         description: description || null
       }
     });

@@ -117,11 +117,33 @@ describe('Books API', () => {
   });
 
   test('搜索：支持年份和期号过滤', async () => {
-    addMockData.books([
-      { title: '期刊1', year: 2023, issue: 1, unlist: false, accessLevel: 0 },
-      { title: '期刊2', year: 2023, issue: 2, unlist: false, accessLevel: 0 },
-      { title: '期刊3', year: 2024, issue: 1, unlist: false, accessLevel: 0 }
-    ]);
+    const testBooks = [
+      { 
+        title: '期刊1', 
+        year: 2023, 
+        issue: 1, 
+        time: 202301,
+        unlist: false, 
+        accessLevel: 0 
+      },
+      { 
+        title: '期刊2', 
+        year: 2023, 
+        issue: 2, 
+        time: 202302,
+        unlist: false, 
+        accessLevel: 0 
+      },
+      { 
+        title: '期刊3', 
+        year: 2024, 
+        issue: 1, 
+        time: 202401,
+        unlist: false, 
+        accessLevel: 0 
+      }
+    ];
+    addMockData.books(testBooks);
 
     const { req, res } = createMocks({
       method: 'GET',
@@ -135,9 +157,12 @@ describe('Books API', () => {
 
     expect(res._getStatusCode()).toBe(200);
     const books = JSON.parse(res._getData());
+    console.log('Search results:', books);  // 添加调试信息
+    console.log('Original books:', testBooks);  // 添加调试信息
     expect(books).toHaveLength(1);
     expect(books[0].year).toBe(2023);
     expect(books[0].issue).toBe(1);
+    expect(books[0].time).toBe(202301);
   });
 
   test('搜索：支持关键词搜索', async () => {
@@ -177,5 +202,73 @@ describe('Books API', () => {
     expect(books).toHaveLength(2);
     expect(books.some(book => book.title.includes('测试'))).toBe(true);
     expect(books.some(book => book.description.includes('测试'))).toBe(true);
+  });
+
+  test('空搜索文本应返回所有数据', async () => {
+    // 准备测试数据，按 year desc, issue desc 排序
+    const mockBooks = [
+      { 
+        id: 3, 
+        title: '期刊3', 
+        year: 2024, 
+        issue: 5, 
+        time: 202405,
+        unlist: false,
+        accessLevel: 0
+      },
+      { 
+        id: 2, 
+        title: '期刊2', 
+        year: 2024, 
+        issue: 3, 
+        time: 202403,
+        unlist: false,
+        accessLevel: 0
+      },
+      { 
+        id: 1, 
+        title: '期刊1', 
+        year: 2024, 
+        issue: 1, 
+        time: 202401,
+        unlist: false,
+        accessLevel: 0
+      },
+      { 
+        id: 4, 
+        title: '期刊4', 
+        year: 2023, 
+        issue: 12, 
+        time: 202312,
+        unlist: false,
+        accessLevel: 0
+      }
+    ];
+    addMockData.books(mockBooks);
+
+    // 添加用户数据
+    const mockUser = {
+      nickName: 'testUser',
+      accessLevel: 1,
+      lastVisit: new Date()
+    };
+    addMockData.users([mockUser]);
+
+    const { req, res } = createMocks({
+      method: 'GET',
+      query: {
+        searchText: '',
+        nickName: 'testUser'
+      }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(200);
+    const sortedBooks = [...mockBooks].sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.issue - a.issue;
+    });
+    expect(JSON.parse(res._getData())).toEqual(sortedBooks);
   });
 }); 
