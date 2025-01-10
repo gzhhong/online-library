@@ -1,30 +1,30 @@
 import { createMocks } from 'node-mocks-http';
 import handler from '@/pages/api/files/[...path]';
-import prisma from '@/lib/db';
 import axios from 'axios';
 import { verifyToken } from '@/lib/auth';
-
-// Mock prisma
-jest.mock('@/lib/db', () => ({
-  book: {
-    findFirst: jest.fn(),
-  },
-  user: {
-    findUnique: jest.fn(),
-  }
-}));
-
-// Mock axios
-jest.mock('axios');
 
 // Mock auth
 jest.mock('@/lib/auth', () => ({
   verifyToken: jest.fn()
 }));
 
+// Mock axios
+jest.mock('axios');
+
+// Mock Prisma
+jest.mock('@/lib/db', () => {
+  const { createMockPrisma } = jest.requireActual('../../../utils/mockPrisma');
+  return createMockPrisma();
+});
+
+// 导入测试工具
+const { clearMockDB, addMockData } = jest.requireActual('../../../utils/mockPrisma');
+
 describe('File Path API', () => {
   beforeEach(() => {
+    clearMockDB();
     jest.clearAllMocks();
+    verifyToken.mockReturnValue(true);
   });
 
   test('返回400如果path参数缺失', async () => {
@@ -327,5 +327,4 @@ describe('File Path API', () => {
     expect(res._getStatusCode()).toBe(302);
     expect(res._getRedirectUrl()).toBe(expectedEncodedUrl);
   });
-
 }); 

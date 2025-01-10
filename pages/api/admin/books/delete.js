@@ -1,5 +1,5 @@
 import { verifyToken } from '@/lib/auth';
-import prisma from '@/lib/db';
+import { prisma } from '@/lib/db';
 import { deleteFromCOS } from '@/lib/cos';
 
 export default async function handler(req, res) {

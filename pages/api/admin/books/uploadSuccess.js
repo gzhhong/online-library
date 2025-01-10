@@ -1,5 +1,5 @@
 import { verifyToken } from '@/lib/auth';
-import prisma from '@/lib/db';
+import { prisma } from '@/lib/db';
 
 export default async function handler(req, res) {
   console.log('UploadSuccess request started');
