@@ -118,9 +118,9 @@ export default function Books() {
         }
     }
 
-    function getFileNameFromPath(path) {
-        return path.split('/').pop();
-    }
+    // function getFileNameFromPath(path) {
+    //     return path.split('/').pop();
+    // }
 
     async function handlePreview(pdfPath) {
         try {
@@ -129,15 +129,15 @@ export default function Books() {
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
-            // window.open(url, '_blank');
+            window.open(url, '_blank');
 
             // Create a temporary link element for downloading
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = getFileNameFromPath(pdfPath); // Extract file name from path
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // const a = document.createElement('a');
+            // a.href = url;
+            // a.download = getFileNameFromPath(pdfPath); // Extract file name from path
+            // document.body.appendChild(a);
+            // a.click();
+            // document.body.removeChild(a);
 
             setTimeout(() => {
                 window.URL.revokeObjectURL(url);
