@@ -73,14 +73,16 @@ describe('File Path API', () => {
 
     const mockDownloadUrl = 'https://example.com/download/test.pdf';
 
+    // 添加测试数据到 mockDB
+    addMockData.books([mockBook]);
+
     // Mock 返回值
-    prisma.book.findFirst.mockResolvedValue(mockBook);
-    verifyToken.mockReturnValue(true);  // 模拟管理员token验证通过
+    verifyToken.mockReturnValue(true);
     axios.post.mockResolvedValue({
       data: {
         errcode: 0,
         file_list: [{
-          fileid: mockBook.pdfFileId,  // 使用mock数据中的fileId
+          fileid: mockBook.pdfFileId,
           download_url: mockDownloadUrl,
           status: 0
         }]
@@ -99,23 +101,14 @@ describe('File Path API', () => {
 
     await handler(req, res);
 
-    expect(res._getStatusCode()).toBe(302);  // 重定向状态码
+    expect(res._getStatusCode()).toBe(302);
     expect(res._getRedirectUrl()).toBe(mockDownloadUrl);
-    expect(prisma.book.findFirst).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          { coverPath: '/books/test.pdf' },
-          { pdfPath: '/books/test.pdf' }
-        ]
-      }
-    });
-    // 验证使用了正确的fileId调用微信API
     expect(axios.post).toHaveBeenCalledWith(
       'http://api.weixin.qq.com/tcb/batchdownloadfile',
       {
         env: process.env.CLOUD_ENV_ID,
         file_list: [{
-          fileid: mockBook.pdfFileId,  // 应该使用PDF的fileId
+          fileid: mockBook.pdfFileId,
           max_age: 3600
         }]
       },
@@ -124,27 +117,34 @@ describe('File Path API', () => {
   });
 
   test('普通用户访问权限不足的文件时返回403', async () => {
+    // Mock 数据
     const mockBook = {
       id: 1,
       title: 'Test Book',
-      accessLevel: 3,
-      pdfPath: '/books/test.pdf'
+      accessLevel: 3,  // 高权限文件
+      coverPath: '/covers/test.jpg',
+      pdfPath: '/books/test.pdf',
+      coverFileId: 'cloud://test-env.covers/test.jpg',
+      pdfFileId: 'cloud://test-env.books/test.pdf'
     };
 
     const mockUser = {
       nickName: 'testUser',
-      accessLevel: 1
+      accessLevel: 1  // 低权限用户
     };
 
-    prisma.book.findFirst.mockResolvedValue(mockBook);
-    prisma.user.findUnique.mockResolvedValue(mockUser);
+    // 添加测试数据到 mockDB
+    addMockData.books([mockBook]);
+    addMockData.users([mockUser]);
+
+    // Mock 返回值
     verifyToken.mockReturnValue(false);  // 不是管理员
 
     const { req, res } = createMocks({
       method: 'GET',
       query: {
         path: ['books', 'test.pdf'],
-        nickName: 'testUser'
+        nickName: 'testUser'  // 添加用户信息
       }
     });
 
@@ -161,10 +161,16 @@ describe('File Path API', () => {
       id: 1,
       title: 'Test Book',
       accessLevel: 1,
-      pdfPath: '/books/test.pdf'
+      coverPath: '/covers/test.jpg',
+      pdfPath: '/books/test.pdf',
+      coverFileId: 'cloud://test-env.covers/test.jpg',
+      pdfFileId: 'cloud://test-env.books/test.pdf'
     };
 
-    prisma.book.findFirst.mockResolvedValue(mockBook);
+    // 添加测试数据到 mockDB
+    addMockData.books([mockBook]);
+
+    // Mock 返回值
     verifyToken.mockReturnValue(false);
     axios.post.mockResolvedValue({
       data: {
@@ -193,15 +199,17 @@ describe('File Path API', () => {
       id: 1,
       title: 'Test Book',
       accessLevel: 1,
-      pdfPath: '/books/test.pdf',
       coverPath: '/covers/test.jpg',
+      pdfPath: '/books/test.pdf',
       coverFileId: 'cloud://test-env.covers/test.jpg',
       pdfFileId: 'cloud://test-env.books/test.pdf'
     };
 
     const mockDownloadUrl = 'https://example.com/download/test.pdf';
 
-    prisma.book.findFirst.mockResolvedValue(mockBook);
+    // 添加测试数据到 mockDB
+    addMockData.books([mockBook]);
+
     verifyToken.mockReturnValue(false);
     axios.post.mockResolvedValue({
       data: {
@@ -251,7 +259,9 @@ describe('File Path API', () => {
 
     const mockDownloadUrl = 'https://example.com/download/test.jpg';
 
-    prisma.book.findFirst.mockResolvedValue(mockBook);
+    // 添加测试数据到 mockDB
+    addMockData.books([mockBook]);
+
     verifyToken.mockReturnValue(false);
     axios.post.mockResolvedValue({
       data: {
@@ -280,7 +290,7 @@ describe('File Path API', () => {
       {
         env: process.env.CLOUD_ENV_ID,
         file_list: [{
-          fileid: mockBook.coverFileId,  // 应该使用封面的fileId
+          fileid: mockBook.coverFileId,
           max_age: 3600
         }]
       },
@@ -302,7 +312,9 @@ describe('File Path API', () => {
     const mockDownloadUrl = 'https://example.com/download/测试文件.jpg';
     const expectedEncodedUrl = 'https://example.com/download/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6.jpg';
 
-    prisma.book.findFirst.mockResolvedValue(mockBook);
+    // 添加测试数据到 mockDB
+    addMockData.books([mockBook]);
+
     verifyToken.mockReturnValue(false);
     axios.post.mockResolvedValue({
       data: {

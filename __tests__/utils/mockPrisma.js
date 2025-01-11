@@ -13,9 +13,6 @@ export const createMockPrisma = () => {
         let results = [...mockDB.books];
         
         if (query.where) {
-          console.log('=== Query Debug Info ===');
-          console.log('1. Query:', JSON.stringify(query, null, 2));
-          console.log('=====================');
           // 基本过滤条件
           if (query.where.unlist === false) {
             results = results.filter(book => !book.unlist);
