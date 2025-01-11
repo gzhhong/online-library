@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { 
-    Grid, 
+import {
+    Grid,
     Button,
     Box,
     CircularProgress,
@@ -31,9 +31,9 @@ export default function Books() {
     const handleSearch = (e) => {
         const searchText = e.target.value;
         setSearchText(searchText);
-        
+
         const searchResults = parseSearchText(searchText);
-        
+
         // 如果返回错误，不进行过滤
         if (searchResults.error) {
             return;
@@ -48,7 +48,7 @@ export default function Books() {
                 switch (condition.key) {
                     case 'time':
                         const conditionTime = parseInt(condition.value, 10);
-                        
+
                         switch (condition.opt) {
                             case 'eq':
                                 matches = matches && book.time === conditionTime;
@@ -118,15 +118,27 @@ export default function Books() {
         }
     }
 
+    function getFileNameFromPath(path) {
+        return path.split('/').pop();
+    }
+
     async function handlePreview(pdfPath) {
         try {
             const response = await fetch(getFullUrl(pdfPath));
             if (!response.ok) throw new Error('Failed to fetch PDF');
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
-            window.open(url, '_blank');
-            
+            // window.open(url, '_blank');
+
+            // Create a temporary link element for downloading
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = getFileNameFromPath(pdfPath); // Extract file name from path
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
             setTimeout(() => {
                 window.URL.revokeObjectURL(url);
             }, 100);
@@ -149,14 +161,14 @@ export default function Books() {
             });
 
             if (!res.ok) throw new Error('更新期刊状态失败');
-            
+
             const updatedBook = await res.json();
-            
-            setBooks(currentBooks => currentBooks.map(b => 
+
+            setBooks(currentBooks => currentBooks.map(b =>
                 b.id === updatedBook.id ? updatedBook : b
             ));
-            
-            setAllBooks(currentAllBooks => currentAllBooks.map(b => 
+
+            setAllBooks(currentAllBooks => currentAllBooks.map(b =>
                 b.id === updatedBook.id ? updatedBook : b
             ));
 
@@ -187,11 +199,11 @@ export default function Books() {
     return (
         <Layout>
             <div className="container mx-auto px-4 py-8">
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
-                    marginBottom: '32px' 
+                    marginBottom: '32px'
                 }}>
                     <span style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#1f2937' }}>期刊管理</span>
                     <TextField
@@ -199,7 +211,7 @@ export default function Books() {
                         value={searchText}
                         onChange={handleSearch}
                         size="small"
-                        sx={{ 
+                        sx={{
                             width: '100%',
                             maxWidth: '450px',
                             '&.MuiOutlinedInput-root': {
