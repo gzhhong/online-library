@@ -1,6 +1,6 @@
-import { prisma } from '@/lib/db';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import prisma from '@/lib/db';
+import { generateToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
