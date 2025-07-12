@@ -40,4 +40,18 @@ model AccessLog {
   firstVisit  DateTime @default(now())
   lastVisit   DateTime @default(now())
   visitCount  Int      @default(1)
+}
+
+model Industry {
+  id          String   @id @db.VarChar(12)
+  title       String   @db.VarChar(100)
+  description String?  @db.Text
+  level       Int      @default(0)
+  parentId    String?  @db.VarChar(12)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 自关联关系
+  parent      Industry? @relation("IndustryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Industry[] @relation("IndustryHierarchy")
 } 
