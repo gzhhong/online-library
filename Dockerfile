@@ -57,10 +57,9 @@ RUN npm install --omit=dev --force
 
 # 生成Prisma客户端
 RUN npx prisma generate
-RUN npx prisma migrate deploy
 
 # 暴露端口
 EXPOSE 3000
 
 # 启动命令
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
