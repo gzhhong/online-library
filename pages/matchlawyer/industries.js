@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import ReactFlow, {
-  addEdge,
   useNodesState,
   useEdgesState,
   Controls,
   Background,
   MiniMap,
+  Handle,
   useReactFlow,
   ReactFlowProvider,
 } from 'reactflow';
@@ -114,6 +114,8 @@ const IndustryNode = ({ data, id }) => {
 
   return (
     <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-lg min-w-[200px]">
+        <Handle type="target" position="top" />
+        <Handle type="source" position="bottom" />
       {isEditing ? (
         <div className="space-y-2">
           <input
@@ -252,8 +254,9 @@ function IndustriesFlow({ industries, setIndustries }) {
           id: `${parentId}-${nodeId}`,
           source: parentId,
           target: nodeId,
-          type: 'smoothstep',
+          type: 'default',
           animated: true,
+          style: { stroke: '#2563eb', strokeWidth: 2 },
         });
       }
 
@@ -314,64 +317,41 @@ function IndustriesFlow({ industries, setIndustries }) {
     setIndustries(prev => [...prev, newIndustry]);
   }, [setIndustries]);
 
-  // 处理连接
-  const onConnect = useCallback(async (params) => {
-    try {
-      const response = await fetch('/api/matchlawyer/industries/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: params.target,
-          title: industries.find(i => i.id === params.target)?.title || '',
-          description: industries.find(i => i.id === params.target)?.description || '',
-          parentId: params.source
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        handleUpdate(result.data);
-        setEdges(eds => addEdge(params, eds));
-        toast.success('移动成功');
-      } else {
-        const error = await response.json();
-        toast.error(error.error || '移动失败');
-      }
-    } catch (error) {
-      toast.error('移动失败');
-    }
-  }, [industries, handleUpdate, setEdges]);
-
   // 更新节点和边
   useEffect(() => {
     if (industries.length > 0) {
       const treeData = buildTreeFromFlat(industries);
       const { nodes: newNodes, edges: newEdges } = createNodesAndEdges(treeData);
       setNodes(newNodes);
-      setEdges(newEdges);
+      setEdges(newEdges); // Update edges state
       setTimeout(() => fitView(), 100);
     }
   }, [industries, createNodesAndEdges, setNodes, setEdges, fitView]);
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      nodeTypes={nodeTypes}
-      fitView
-      attributionPosition="bottom-left"
-    >
-      <Controls />
-      <Background />
-      <MiniMap />
-    </ReactFlow>
+    <div style={{ width: '100%', height: '100%' }}>
+      <ReactFlow
+        nodes={nodes}
+        onNodesChange={onNodesChange}
+        edges={edges}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        fitView
+        attributionPosition="bottom-left"
+        connectOnClick={false}
+        nodesDraggable={true}
+        nodesConnectable={false}
+        elementsSelectable={true}
+      >
+        <Controls />
+        <Background />
+        <MiniMap />
+      </ReactFlow>
+    </div>
   );
 }
+
+import MatchLawyerLayout from '../../components/MatchLawyerLayout';
 
 // 主组件
 export default function IndustriesPage() {
@@ -408,7 +388,7 @@ export default function IndustriesPage() {
           },
           body: JSON.stringify({
             title: '根标签',
-            description: '这是根标签',
+            description: '这是根标签，不能编辑',
             parentId: '00000000000'
           }),
         });
@@ -435,24 +415,27 @@ export default function IndustriesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-xl">加载中...</div>
-      </div>
+      <MatchLawyerLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-xl">加载中...</div>
+        </div>
+      </MatchLawyerLayout>
     );
   }
 
   return (
-    <div className="h-screen w-full">
-      <div className="bg-white border-b p-4">
-        <h1 className="text-2xl font-bold text-gray-800">标签管理</h1>
-        <p className="text-gray-600">拖拽标签可以改变层级关系</p>
+    <MatchLawyerLayout>
+      <div className="h-screen w-full flex flex-col">
+        <div className="bg-white border-b p-4 flex-shrink-0">
+          <h1 className="text-2xl font-bold text-gray-800">行业标签管理</h1>
+        </div>
+        
+        <div className="flex-1 w-full" style={{ height: 'calc(100vh - 80px)' }}>
+          <ReactFlowProvider>
+            <IndustriesFlow industries={industries} setIndustries={setIndustries} />
+          </ReactFlowProvider>
+        </div>
       </div>
-      
-      <div className="h-full">
-        <ReactFlowProvider>
-          <IndustriesFlow industries={industries} setIndustries={setIndustries} />
-        </ReactFlowProvider>
-      </div>
-    </div>
+    </MatchLawyerLayout>
   );
 }
