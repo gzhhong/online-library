@@ -119,7 +119,7 @@ export default function MembersPage() {
         formData.append('company', selectedMember.company);
       }
 
-      if (selectedMember.type === '律师' && selectedMember.industries) {
+      if (selectedMember.type === '律师' && selectedMember.industries && selectedMember.industries.length > 0) {
         formData.append('industryIds', JSON.stringify(selectedMember.industries.map(i => i.id)));
       }
 
@@ -427,14 +427,20 @@ export default function MembersPage() {
                         行业标签
                       </Typography>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {selectedMember.industries.map((industry) => (
-                          <Chip
-                            key={industry.id}
-                            label={industry.title}
-                            color="primary"
-                            variant="outlined"
-                          />
-                        ))}
+                        {selectedMember.industries && selectedMember.industries.length > 0 ? (
+                          selectedMember.industries.map((industry) => (
+                            <Chip
+                              key={industry.id}
+                              label={industry.title}
+                              color="primary"
+                              variant="outlined"
+                            />
+                          ))
+                        ) : (
+                          <Typography variant="body2" color="textSecondary">
+                            暂无行业标签
+                          </Typography>
+                        )}
                       </Box>
                     </Grid>
                   )}

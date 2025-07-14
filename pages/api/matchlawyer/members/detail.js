@@ -47,9 +47,10 @@ export default async function handler(req, res) {
       images: member.images ? JSON.parse(member.images) : [],
       status: member.status,
       isPaid: member.isPaid,
+      company: member.company,
       createdAt: member.createdAt,
       updatedAt: member.updatedAt,
-      industries: industries.map(i => ({ id: i.id, title: i.title, description: i.description }))
+      industries: industries.length > 0 ? industries.map(i => ({ id: i.id, title: i.title, description: i.description })) : []
     };
 
     res.status(200).json({

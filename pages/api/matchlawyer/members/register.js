@@ -156,21 +156,23 @@ export default async function handler(req, res) {
     }
 
     // 创建会员
+    const memberData = {
+      type: fields.type[0],
+      name: fields.name[0],
+      idNumber: fields.idNumber[0],
+      benefitType: fields.benefitType[0],
+      description: fields.description ? fields.description[0] : null,
+      email: fields.email[0],
+      phone: fields.phone[0],
+      company: fields.company ? fields.company[0] : null,
+      images: imagePaths.length > 0 ? JSON.stringify(imagePaths) : null,
+      industryIds: industryIds.length > 0 ? JSON.stringify(industryIds) : null,
+      status: 0, // 待审核
+      isPaid: false,
+    };
+    
     const member = await prisma.member.create({
-      data: {
-        type: fields.type[0],
-        name: fields.name[0],
-        idNumber: fields.idNumber[0],
-        benefitType: fields.benefitType[0],
-        description: fields.description ? fields.description[0] : null,
-        email: fields.email[0],
-        phone: fields.phone[0],
-        company: fields.company ? fields.company[0] : null,
-        images: imagePaths.length > 0 ? JSON.stringify(imagePaths) : null,
-        industryIds: industryIds.length > 0 ? JSON.stringify(industryIds) : null,
-        status: 0, // 待审核
-        isPaid: false,
-      }
+      data: memberData
     });
 
     res.status(201).json({
