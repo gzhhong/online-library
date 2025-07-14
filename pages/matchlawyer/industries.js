@@ -387,8 +387,8 @@ export default function IndustriesPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            title: '根标签',
-            description: '这是根标签，不能编辑',
+            title: '法学',
+            description: '这是根节点，不能编辑',
             parentId: '00000000000'
           }),
         });

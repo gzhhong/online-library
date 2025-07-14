@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       const rootIndustry = await prisma.industry.create({
         data: {
           id: '00000000000',
-          title: '根标签',
+          title: '法学',
           description: '这是所有标签的根节点',
           level: 0,
           parentId: null

@@ -54,4 +54,21 @@ model Industry {
   // 自关联关系
   parent      Industry? @relation("IndustryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children    Industry[] @relation("IndustryHierarchy")
-} 
+}
+
+model Member {
+  id              Int      @id @default(autoincrement())
+  type            String   @db.VarChar(20) // 企业或律师
+  name            String   @db.VarChar(100)
+  idNumber        String   @unique @db.VarChar(50)
+  benefitType     String   @db.VarChar(20)
+  description     String?  @db.Text
+  email           String   @db.VarChar(100)
+  phone           String   @db.VarChar(20)
+  images          String?  @db.Text // JSON格式存储图片路径数组
+  industryIds     String?  @db.Text // JSON格式存储行业标签ID数组，仅律师用
+  status          Int      @default(0) // 0: 待审核, 1: 正式会员
+  isPaid          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
