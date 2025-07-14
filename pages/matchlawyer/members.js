@@ -106,26 +106,56 @@ export default function MembersPage() {
 
     setUpdating(true);
     try {
-      const formData = new FormData();
-      formData.append('id', selectedMember.id);
-      formData.append('benefitType', selectedMember.benefitType);
-      formData.append('description', selectedMember.description || '');
-      formData.append('email', selectedMember.email);
-      formData.append('phone', selectedMember.phone);
-      formData.append('isPaid', selectedMember.isPaid.toString());
-      formData.append('type', selectedMember.type);
-      
-      if (selectedMember.company) {
-        formData.append('company', selectedMember.company);
+      // 1. 先进行验证
+      const validationData = {
+        id: selectedMember.id,
+        benefitType: selectedMember.benefitType,
+        description: selectedMember.description || '',
+        email: selectedMember.email,
+        phone: selectedMember.phone
+      };
+
+      const validationResponse = await fetch('/api/matchlawyer/members/validateUpdate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(validationData),
+      });
+
+      if (!validationResponse.ok) {
+        const validationResult = await validationResponse.json();
+        if (validationResult.details && Array.isArray(validationResult.details)) {
+          validationResult.details.forEach(error => toast.error(error));
+        } else {
+          toast.error(validationResult.error || '验证失败');
+        }
+        setUpdating(false);
+        return;
       }
 
-      if (selectedMember.type === '律师' && selectedMember.industries && selectedMember.industries.length > 0) {
-        formData.append('industryIds', JSON.stringify(selectedMember.industries.map(i => i.id)));
-      }
+      // 2. 验证通过后，进行更新
+      const updateData = {
+        id: selectedMember.id,
+        benefitType: selectedMember.benefitType,
+        description: selectedMember.description || '',
+        email: selectedMember.email,
+        phone: selectedMember.phone,
+        isPaid: selectedMember.isPaid,
+        type: selectedMember.type,
+        company: selectedMember.company || null,
+        industryIds: selectedMember.type === '律师' && selectedMember.industries && selectedMember.industries.length > 0 
+          ? selectedMember.industries.map(i => i.id) 
+          : [],
+        images: selectedMember.images || []
+      };
 
-      const response = await fetch('/api/matchlawyer/members/update', {
+      const response = await fetch('/api/matchlawyer/members/updateSuccess', {
         method: 'PUT',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
       });
 
       if (response.ok) {

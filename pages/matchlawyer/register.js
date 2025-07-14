@@ -94,65 +94,106 @@ export default function RegisterPage() {
     e.preventDefault();
     setSubmitting(true);
 
-    // 客户端验证
-    const errors = [];
-    
-    // 验证邮箱格式
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      errors.push('邮箱格式不正确');
-    }
-    
-    // 验证手机号格式
-    const phoneRegex = /^1[3-9]\d{9}$/;
-    if (!phoneRegex.test(formData.phone)) {
-      errors.push('手机号格式不正确，请输入11位数字');
-    }
-    
-    // 验证文字信息长度
-    if (formData.description && formData.description.length > 2000) {
-      errors.push('会员文字信息不能超过2000个字符');
-    }
-    
-    // 验证律师必须选择行业标签
-    if (formData.type === '律师' && selectedIndustries.length === 0) {
-      errors.push('律师必须选择行业标签');
-    }
-    
-    // 如果有验证错误，显示错误并停止提交
-    if (errors.length > 0) {
-      errors.forEach(error => toast.error(error));
-      setSubmitting(false);
-      return;
-    }
-
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('type', formData.type);
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('idNumber', formData.idNumber);
-      formDataToSend.append('benefitType', formData.benefitType);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
+      // 1. 先进行服务端验证
+      const validationData = {
+        type: formData.type,
+        name: formData.name,
+        idNumber: formData.idNumber,
+        benefitType: formData.benefitType,
+        description: formData.description,
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.type === '律师' ? formData.company : null,
+        industryIds: formData.type === '律师' && selectedIndustries.length > 0 ? selectedIndustries : []
+      };
 
-      if (formData.type === '律师') {
-        if (selectedIndustries.length > 0) {
-          formDataToSend.append('industryIds', JSON.stringify(selectedIndustries));
+      const validationResponse = await fetch('/api/matchlawyer/members/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(validationData),
+      });
+
+      if (!validationResponse.ok) {
+        const validationResult = await validationResponse.json();
+        if (validationResult.details && Array.isArray(validationResult.details)) {
+          validationResult.details.forEach(error => toast.error(error));
+        } else {
+          toast.error(validationResult.error || '验证失败');
         }
-        if (formData.company) {
-          formDataToSend.append('company', formData.company);
+        setSubmitting(false);
+        return;
+      }
+
+      // 2. 验证通过后，开始上传图片
+      // 1. 先上传图片到腾讯云
+      const imagePaths = [];
+      if (selectedImages.length > 0) {
+        for (const image of selectedImages) {
+          // 生成文件路径
+          const ext = image.name.split('.').pop();
+          const fileName = `member_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`;
+          const cloudPath = `members/${fileName}`;
+
+          // 获取上传链接
+          const uploadRes = await fetch('/api/matchlawyer/members/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ path: cloudPath }),
+          });
+
+          if (!uploadRes.ok) {
+            throw new Error('获取图片上传链接失败');
+          }
+
+          const uploadData = await uploadRes.json();
+
+          // 上传到腾讯云
+          const formData = new FormData();
+          formData.append('key', cloudPath);
+          formData.append('Signature', uploadData.authorization);
+          formData.append('x-cos-security-token', uploadData.token);
+          formData.append('x-cos-meta-fileid', uploadData.cos_file_id);
+          formData.append('file', image);
+
+          const cosRes = await fetch(uploadData.url, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!cosRes.ok) {
+            throw new Error('图片上传到腾讯云失败');
+          }
+
+          // 保存云存储路径
+          imagePaths.push(`/members/${fileName}`);
         }
       }
 
-      // 添加图片文件
-      selectedImages.forEach((image, index) => {
-        formDataToSend.append('images', image);
-      });
+      // 2. 调用注册成功API，创建会员记录
+      const registerData = {
+        type: formData.type,
+        name: formData.name,
+        idNumber: formData.idNumber,
+        benefitType: formData.benefitType,
+        description: formData.description,
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.type === '律师' ? formData.company : null,
+        industryIds: formData.type === '律师' && selectedIndustries.length > 0 ? selectedIndustries : [],
+        images: imagePaths
+      };
 
-      const response = await fetch('/api/matchlawyer/members/register', {
+      const response = await fetch('/api/matchlawyer/members/registerSuccess', {
         method: 'POST',
-        body: formDataToSend
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerData),
       });
 
       // 尝试解析响应
@@ -316,7 +357,7 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 required
-                error={formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)}
+                error={Boolean(formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))}
                 helperText={formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '请输入正确的邮箱格式' : ''}
               />
             </Grid>
@@ -328,7 +369,7 @@ export default function RegisterPage() {
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 required
-                error={formData.phone && !/^1[3-9]\d{9}$/.test(formData.phone)}
+                error={Boolean(formData.phone && !/^1[3-9]\d{9}$/.test(formData.phone))}
                 helperText={formData.phone && !/^1[3-9]\d{9}$/.test(formData.phone) ? '请输入11位手机号码' : ''}
               />
             </Grid>
@@ -341,7 +382,7 @@ export default function RegisterPage() {
                 rows={4}
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                error={formData.description && formData.description.length > 2000}
+                error={Boolean(formData.description && formData.description.length > 2000)}
                 helperText={
                   formData.description && formData.description.length > 2000 
                     ? '文字信息不能超过2000个字符' 
