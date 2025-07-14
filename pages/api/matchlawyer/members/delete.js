@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import axios from 'axios';
+import { deleteFromCOS } from '@/lib/cos';
 
 export default async function handler(req, res) {
   if (req.method !== 'DELETE') {
@@ -31,25 +31,13 @@ export default async function handler(req, res) {
           const fileName = imagePath.split('/').pop();
           const cloudPath = `members/${fileName}`;
           
-          // 调用腾讯云删除接口
-          const deleteRes = await axios({
-            method: 'POST',
-            url: 'http://api.weixin.qq.com/tcb/batchdeletefile',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            data: {
-              env: process.env.CLOUD_ENV_ID,
-              fileid_list: [cloudPath]
-            }
-          });
-
-          if (deleteRes.data.errcode !== 0) {
-            console.error('删除云文件失败:', deleteRes.data);
-          }
+          // 使用统一的删除方法
+          await deleteFromCOS(cloudPath);
+          console.log('成功删除云文件:', cloudPath);
         }
       } catch (error) {
         console.error('删除图片文件错误:', error);
+        // 继续执行，不因为删除文件失败而阻止数据库记录的删除
       }
     }
 
