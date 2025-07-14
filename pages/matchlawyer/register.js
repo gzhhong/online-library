@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import MatchLawyerLayout from '../../components/MatchLawyerLayout';
 import {
   Box,
   Typography,
@@ -226,23 +227,24 @@ export default function RegisterPage() {
   };
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      p: 2
-    }}>
-      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 600 }}>
-        <Typography variant="h4" component="h1" gutterBottom align="center">
-          会员注册
-        </Typography>
-        
-        <Alert severity="info" sx={{ mb: 3 }}>
-          注册后需要等待管理员审核，审核通过后即可成为正式会员。
-        </Alert>
+    <MatchLawyerLayout>
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        p: 2,
+        minHeight: 'calc(100vh - 64px)' // 减去顶部导航栏高度
+      }}>
+        <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 600 }}>
+          <Typography variant="h4" component="h1" gutterBottom align="center">
+            会员注册
+          </Typography>
+          
+          <Alert severity="info" sx={{ mb: 3 }}>
+            注册后需要等待管理员审核，审核通过后即可成为正式会员。
+          </Alert>
 
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
@@ -453,5 +455,6 @@ export default function RegisterPage() {
         </form>
       </Paper>
     </Box>
+    </MatchLawyerLayout>
   );
 } 

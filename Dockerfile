@@ -62,4 +62,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # 启动命令
-CMD ["sh", "-c", "npm start"]
+CMD ["npm", "start"]
