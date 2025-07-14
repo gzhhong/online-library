@@ -165,6 +165,7 @@ export default async function handler(req, res) {
         description: fields.description ? fields.description[0] : null,
         email: fields.email[0],
         phone: fields.phone[0],
+        company: fields.company ? fields.company[0] : null,
         images: imagePaths.length > 0 ? JSON.stringify(imagePaths) : null,
         industryIds: industryIds.length > 0 ? JSON.stringify(industryIds) : null,
         status: 0, // 待审核

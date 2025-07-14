@@ -114,6 +114,10 @@ export default function MembersPage() {
       formData.append('phone', selectedMember.phone);
       formData.append('isPaid', selectedMember.isPaid.toString());
       formData.append('type', selectedMember.type);
+      
+      if (selectedMember.company) {
+        formData.append('company', selectedMember.company);
+      }
 
       if (selectedMember.type === '律师' && selectedMember.industries) {
         formData.append('industryIds', JSON.stringify(selectedMember.industries.map(i => i.id)));
@@ -326,6 +330,19 @@ export default function MembersPage() {
                       disabled
                       margin="normal"
                     />
+                    {selectedMember.type === '律师' && (
+                      <TextField
+                        fullWidth
+                        label="工作单位"
+                        value={selectedMember.company || ''}
+                        onChange={(e) => setSelectedMember({
+                          ...selectedMember,
+                          company: e.target.value
+                        })}
+                        disabled={!editMode}
+                        margin="normal"
+                      />
+                    )}
                     <FormControl fullWidth margin="normal">
                       <InputLabel>权益类型</InputLabel>
                       <Select

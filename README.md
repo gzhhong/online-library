@@ -161,3 +161,20 @@ npx prisma db push：直接将 schema 推送到数据库，跳过迁移历史
 权限配置：确保数据库用户有足够的权限执行迁移
 备份策略：在应用迁移前备份生产数据库
 这样就能正确地将 MatchLawyer 系统部署到腾讯云 MySQL 实例上了
+
+服务器上可以执行语句：
+CREATE TABLE Industry (
+id VARCHAR(12) PRIMARY KEY,
+title VARCHAR(100) NOT NULL,
+description TEXT NULL,
+level INT NOT NULL DEFAULT 0,
+parentId VARCHAR(12) NULL,
+createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+
+CONSTRAINT fk_industry_parent
+FOREIGN KEY (parentId)
+REFERENCES Industry(id)
+ON DELETE SET NULL
+);
+建表

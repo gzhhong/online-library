@@ -24,7 +24,8 @@ export default function RegisterPage() {
     benefitType: '免费',
     description: '',
     email: '',
-    phone: ''
+    phone: '',
+    company: ''
   });
   const [selectedIndustries, setSelectedIndustries] = useState([]);
   const [industries, setIndustries] = useState([]);
@@ -134,8 +135,13 @@ export default function RegisterPage() {
       formDataToSend.append('email', formData.email);
       formDataToSend.append('phone', formData.phone);
 
-      if (formData.type === '律师' && selectedIndustries.length > 0) {
-        formDataToSend.append('industryIds', JSON.stringify(selectedIndustries));
+      if (formData.type === '律师') {
+        if (selectedIndustries.length > 0) {
+          formDataToSend.append('industryIds', JSON.stringify(selectedIndustries));
+        }
+        if (formData.company) {
+          formDataToSend.append('company', formData.company);
+        }
       }
 
       // 添加图片文件
@@ -167,7 +173,8 @@ export default function RegisterPage() {
           benefitType: '免费',
           description: '',
           email: '',
-          phone: ''
+          phone: '',
+          company: ''
         });
         setSelectedIndustries([]);
         setSelectedImages([]);
@@ -286,6 +293,18 @@ export default function RegisterPage() {
                 required
               />
             </Grid>
+
+            {formData.type === '律师' && (
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="工作单位"
+                  value={formData.company}
+                  onChange={(e) => setFormData({...formData, company: e.target.value})}
+                  placeholder="请输入工作单位名称"
+                />
+              </Grid>
+            )}
 
             <Grid item xs={12} md={6}>
               <TextField

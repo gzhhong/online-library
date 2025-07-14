@@ -170,6 +170,10 @@ export default async function handler(req, res) {
       updateData.phone = fields.phone[0];
     }
     
+    if (fields.company !== undefined) {
+      updateData.company = fields.company ? fields.company[0] : null;
+    }
+    
     if (fields.isPaid !== undefined) {
       updateData.isPaid = fields.isPaid[0] === 'true';
     }
@@ -198,6 +202,7 @@ export default async function handler(req, res) {
       description: updatedMember.description,
       email: updatedMember.email,
       phone: updatedMember.phone,
+      company: updatedMember.company,
       images: updatedMember.images ? JSON.parse(updatedMember.images) : [],
       status: updatedMember.status,
       isPaid: updatedMember.isPaid,

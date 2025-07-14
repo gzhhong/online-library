@@ -62,4 +62,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # 启动命令
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "npm start"]
