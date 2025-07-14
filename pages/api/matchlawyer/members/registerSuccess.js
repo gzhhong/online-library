@@ -18,7 +18,8 @@ export default async function handler(req, res) {
       phone, 
       company, 
       industryIds, 
-      images 
+      images,
+      imageTcpId
     } = req.body;
 
     // 数据已经在validate API中验证过，这里只做基本检查
@@ -37,6 +38,7 @@ export default async function handler(req, res) {
       phone,
       company: company || null,
       images: images && images.length > 0 ? JSON.stringify(images) : null,
+      imageTcpId: imageTcpId && imageTcpId.length > 0 ? JSON.stringify(imageTcpId) : null,
       industryIds: industryIds && industryIds.length > 0 ? JSON.stringify(industryIds) : null,
       status: 0, // 待审核
       isPaid: false,

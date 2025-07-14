@@ -17,6 +17,7 @@ export default async function handler(req, res) {
       company, 
       industryIds, 
       images,
+      imageTcpId,
       isPaid 
     } = req.body;
 
@@ -69,6 +70,10 @@ export default async function handler(req, res) {
       updateData.images = images && images.length > 0 ? JSON.stringify(images) : null;
     }
 
+    if (imageTcpId !== undefined) {
+      updateData.imageTcpId = imageTcpId && imageTcpId.length > 0 ? JSON.stringify(imageTcpId) : null;
+    }
+
     if (industryIds !== undefined) {
       updateData.industryIds = industryIds && industryIds.length > 0 ? JSON.stringify(industryIds) : null;
     }
@@ -93,6 +98,7 @@ export default async function handler(req, res) {
       phone: updatedMember.phone,
       company: updatedMember.company,
       images: updatedMember.images ? JSON.parse(updatedMember.images) : [],
+      imageTcpId: updatedMember.imageTcpId ? JSON.parse(updatedMember.imageTcpId) : [],
       status: updatedMember.status,
       isPaid: updatedMember.isPaid,
       createdAt: updatedMember.createdAt,

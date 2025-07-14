@@ -40,9 +40,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // 返回微信接口的响应
+    // 返回微信接口的响应，包括file_id
     console.log('Successfully got upload URL');
-    res.status(200).json(response.data);
+    res.status(200).json({
+      ...response.data,
+      file_id: response.data.fileid // 确保返回file_id
+    });
     
   } catch (error) {
     console.error('Upload error:', {

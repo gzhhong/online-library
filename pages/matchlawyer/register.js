@@ -130,6 +130,7 @@ export default function RegisterPage() {
       // 2. 验证通过后，开始上传图片
       // 1. 先上传图片到腾讯云
       const imagePaths = [];
+      const imageTcpIds = [];
       if (selectedImages.length > 0) {
         for (const image of selectedImages) {
           // 生成文件路径
@@ -169,8 +170,9 @@ export default function RegisterPage() {
             throw new Error('图片上传到腾讯云失败');
           }
 
-          // 保存云存储路径
+          // 保存云存储路径和file_id
           imagePaths.push(`/members/${fileName}`);
+          imageTcpIds.push(uploadData.file_id);
         }
       }
 
@@ -185,7 +187,8 @@ export default function RegisterPage() {
         phone: formData.phone,
         company: formData.type === '律师' ? formData.company : null,
         industryIds: formData.type === '律师' && selectedIndustries.length > 0 ? selectedIndustries : [],
-        images: imagePaths
+        images: imagePaths,
+        imageTcpId: imageTcpIds
       };
 
       const response = await fetch('/api/matchlawyer/members/registerSuccess', {

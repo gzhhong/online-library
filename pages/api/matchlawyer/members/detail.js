@@ -6,7 +6,6 @@ export default async function handler(req, res) {
   }
 
   const { id } = req.query;
-
   if (!id) {
     return res.status(400).json({ error: '会员ID是必需的' });
   }
@@ -20,13 +19,14 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: '会员不存在' });
     }
 
-    // 解析行业标签ID
+    // 获取行业标签信息
     let industryIds = [];
     if (member.industryIds) {
       try {
         industryIds = JSON.parse(member.industryIds);
       } catch {}
     }
+
     let industries = [];
     if (industryIds.length > 0) {
       industries = await prisma.industry.findMany({
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 格式化数据
+    // 格式化返回数据
     const formattedMember = {
       id: member.id,
       type: member.type,
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
       email: member.email,
       phone: member.phone,
       images: member.images ? JSON.parse(member.images) : [],
+      imageTcpId: member.imageTcpId ? JSON.parse(member.imageTcpId) : [],
       status: member.status,
       isPaid: member.isPaid,
       company: member.company,

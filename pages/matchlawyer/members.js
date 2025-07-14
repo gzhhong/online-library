@@ -43,6 +43,10 @@ export default function MembersPage() {
   const [industries, setIndustries] = useState([]);
   const [updating, setUpdating] = useState(false);
 
+  function getFullUrl(fileId) {
+    return `${window.location.origin}/api/matchlawyer/files?file_id=${fileId}`;
+  }
+
   // 加载会员列表
   const loadMembers = async () => {
     try {
@@ -147,7 +151,8 @@ export default function MembersPage() {
         industryIds: selectedMember.type === '律师' && selectedMember.industries && selectedMember.industries.length > 0 
           ? selectedMember.industries.map(i => i.id) 
           : [],
-        images: selectedMember.images || []
+        images: selectedMember.images || [],
+        imageTcpId: selectedMember.imageTcpId || []
       };
 
       const response = await fetch('/api/matchlawyer/members/updateSuccess', {
@@ -476,18 +481,18 @@ export default function MembersPage() {
                   )}
 
                   {/* 图片 */}
-                  {selectedMember.images && selectedMember.images.length > 0 && (
+                  {selectedMember.imageTcpId && selectedMember.imageTcpId.length > 0 && (
                     <Grid item xs={12}>
                       <Typography variant="h6" gutterBottom>
                         会员图片
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                        {selectedMember.images.map((image, index) => (
+                        {selectedMember.imageTcpId.map((fileId, index) => (
                           <Card key={index} sx={{ width: 200 }}>
                             <CardMedia
                               component="img"
                               height="140"
-                              image={image}
+                              image={getFullUrl(fileId)}
                               alt={`图片 ${index + 1}`}
                             />
                             <CardContent>

@@ -29,7 +29,7 @@ export default async function handler(req, res) {
         for (const imagePath of imagePaths) {
           // 从路径中提取文件名
           const fileName = imagePath.split('/').pop();
-          const cloudPath = `members/${fileName}`;
+          const cloudPath = `/members/${fileName}`;
           
           // 使用统一的删除方法
           await deleteFromCOS(cloudPath);

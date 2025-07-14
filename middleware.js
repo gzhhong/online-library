@@ -39,7 +39,7 @@ export function middleware(request) {
         return NextResponse.redirect(new URL('/matchlawyer/login', request.url));
       }
       // 有token，重定向到首页或主页面
-      return NextResponse.redirect(new URL('/matchlawyer/dashboard', request.url));
+      return NextResponse.redirect(new URL('/matchlawyer/industries', request.url));
     }
     // 排除登录页面，直接通过
     if (request.nextUrl.pathname === '/matchlawyer/login') {

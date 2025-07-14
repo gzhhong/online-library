@@ -48,6 +48,7 @@ export default async function handler(req, res) {
         email: member.email,
         phone: member.phone,
         images: member.images ? JSON.parse(member.images) : [],
+        imageTcpId: member.imageTcpId ? JSON.parse(member.imageTcpId) : [],
         status: member.status,
         isPaid: member.isPaid,
         company: member.company,

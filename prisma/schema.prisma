@@ -67,6 +67,7 @@ model Member {
   phone           String   @db.VarChar(20)
   company         String?  @db.VarChar(100) // 工作单位，仅律师用
   images          String?  @db.Text // JSON格式存储图片路径数组
+  imageTcpId      String?  @db.Text // JSON格式存储图片的TCP file_id数组
   industryIds     String?  @db.Text // JSON格式存储行业标签ID数组，仅律师用
   status          Int      @default(0) // 0: 待审核, 1: 正式会员
   isPaid          Boolean  @default(false)
