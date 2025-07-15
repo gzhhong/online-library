@@ -13,8 +13,8 @@ model Book {
   accessLevel Int      @default(0)
   coverPath   String
   pdfPath     String
-  coverFileId String   // 封面文件的云存储ID
-  pdfFileId   String   // PDF文件的云存储ID
+  coverFileId String // 封面文件的云存储ID
+  pdfFileId   String // PDF文件的云存储ID
   unlist      Boolean  @default(false)
   createdAt   DateTime @default(now())
   year        Int?
@@ -24,22 +24,22 @@ model Book {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  nickName    String   @unique
-  accessLevel Int      @default(0)
-  name        String?  @db.VarChar(20)
-  title       String?  @db.VarChar(20)
-  organization String? @db.VarChar(40)
-  lastVisit   DateTime @default(now())
-  createdAt   DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  nickName     String   @unique
+  accessLevel  Int      @default(0)
+  name         String?  @db.VarChar(20)
+  title        String?  @db.VarChar(20)
+  organization String?  @db.VarChar(40)
+  lastVisit    DateTime @default(now())
+  createdAt    DateTime @default(now())
 }
 
 model AccessLog {
-  id          Int      @id @default(autoincrement())
-  nickName    String   @unique
-  firstVisit  DateTime @default(now())
-  lastVisit   DateTime @default(now())
-  visitCount  Int      @default(1)
+  id         Int      @id @default(autoincrement())
+  nickName   String   @unique
+  firstVisit DateTime @default(now())
+  lastVisit  DateTime @default(now())
+  visitCount Int      @default(1)
 }
 
 model Industry {
@@ -50,29 +50,54 @@ model Industry {
   parentId    String?  @db.VarChar(12)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // 自关联关系
-  parent      Industry? @relation("IndustryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children    Industry[] @relation("IndustryHierarchy")
+  parent   Industry?  @relation("IndustryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Industry[] @relation("IndustryHierarchy")
 }
 
 model Member {
-  id              Int      @id @default(autoincrement())
-  type            String   @db.VarChar(20) // 企业或律师
-  name            String   @db.VarChar(100)
-  idNumber        String   @unique @db.VarChar(50)
-  benefitType     String   @db.VarChar(20)
-  description     String?  @db.Text
-  email           String   @unique @db.VarChar(100)
-  phone           String   @unique @db.VarChar(20)
-  company         String?  @db.VarChar(100) // 工作单位，仅律师用
-  images          String?  @db.Text // JSON格式存储图片路径数组
-  imageTcpId      String?  @db.Text // JSON格式存储图片的TCP file_id数组
-  industryIds     String?  @db.Text // JSON格式存储行业标签ID数组，仅律师用
-  status          Int      @default(0) // 0: 待审核, 1: 正式成员
-  isPaid          Boolean  @default(false)
-  isStopped       Boolean  @default(false)
-  password        String   @db.VarChar(20) @default("temp_password")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  type        String   @db.VarChar(20) // 企业或律师
+  name        String   @db.VarChar(100)
+  idNumber    String   @unique @db.VarChar(50)
+  benefitType String   @db.VarChar(20)
+  description String?  @db.Text
+  email       String   @unique @db.VarChar(100)
+  phone       String   @unique @db.VarChar(20)
+  company     String?  @db.VarChar(100) // 工作单位，仅律师用
+  images      String?  @db.Text // JSON格式存储图片路径数组
+  imageTcpId  String?  @db.Text // JSON格式存储图片的TCP file_id数组
+  industryIds String?  @db.Text // JSON格式存储行业标签ID数组，仅律师用
+  status      Int      @default(0) // 0: 待审核, 1: 正式成员
+  isPaid      Boolean  @default(false)
+  isStopped   Boolean  @default(false)
+  password    String   @default("temp_password") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BenefitType {
+  id           String         @id @db.VarChar(6) // 六位随机字符，全大写
+  title        String         @db.VarChar(100)
+  isPaid       Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  BenefitGroup BenefitGroup[]
+}
+
+model BenefitGroup {
+  id            Int      @id @default(autoincrement())
+  groupId       String   @db.VarChar(6) // 6位随机字符，全大写
+  title         String   @db.VarChar(100)
+  benefitTypeId String   @db.VarChar(6)
+  times         Int      @default(1) // 次数
+  description   String?  @db.Text
+  price         Decimal  @default(0) @db.Decimal(10, 2)
+  notShow       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 关联关系
+  benefitType BenefitType @relation(fields: [benefitTypeId], references: [id], onDelete: Restrict)
 }
