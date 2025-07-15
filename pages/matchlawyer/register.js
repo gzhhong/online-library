@@ -16,13 +16,14 @@ import {
   CircularProgress
 } from '@mui/material';
 import { toast } from 'react-hot-toast';
+import { useBenefitTypes } from '../../lib/useBenefitTypes';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     type: '企业',
     name: '',
     idNumber: '',
-    benefitType: '免费成员',
+    benefitType: '',
     description: '',
     email: '',
     phone: '',
@@ -33,6 +34,9 @@ export default function RegisterPage() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  
+  // 使用自定义hook获取权益类型
+  const { benefitTypes, loading: benefitTypesLoading, error: benefitTypesError } = useBenefitTypes();
 
   const MAX_FILE_SIZE = 80 * 1024; // 80KB
   const MAX_IMAGES = 3;
@@ -53,6 +57,13 @@ export default function RegisterPage() {
 
     loadIndustries();
   }, []);
+
+  // 设置默认权益类型
+  useEffect(() => {
+    if (benefitTypes.length > 0 && !formData.benefitType) {
+      setFormData(prev => ({ ...prev, benefitType: benefitTypes[0] }));
+    }
+  }, [benefitTypes, formData.benefitType]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -215,7 +226,7 @@ export default function RegisterPage() {
           type: '企业',
           name: '',
           idNumber: '',
-          benefitType: '免费成员',
+          benefitType: '',
           description: '',
           email: '',
           phone: '',
@@ -287,6 +298,12 @@ export default function RegisterPage() {
           <Alert severity="info" sx={{ mb: 3 }}>
             注册后需要等待管理员审核，审核通过后即可成为正式成员。
           </Alert>
+          
+          {benefitTypesError && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              加载权益类型失败: {benefitTypesError}
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
@@ -311,11 +328,17 @@ export default function RegisterPage() {
                   value={formData.benefitType}
                   onChange={(e) => setFormData({...formData, benefitType: e.target.value})}
                   label="权益类型"
+                  disabled={benefitTypesLoading}
                 >
-                  <MenuItem value="免费成员">免费成员</MenuItem>
-                  <MenuItem value="一星成员">一星成员</MenuItem>
-                  <MenuItem value="二星成员">二星成员</MenuItem>
-                  <MenuItem value="三星成员">三星成员</MenuItem>
+                  {benefitTypesLoading ? (
+                    <MenuItem disabled>加载中...</MenuItem>
+                  ) : (
+                    benefitTypes.map((type, index) => (
+                      <MenuItem key={index} value={type}>
+                        {type}
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
             </Grid>

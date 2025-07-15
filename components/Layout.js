@@ -96,11 +96,22 @@ export default function Layout({ children, menuItems, title }) {
                                                 <ListItem 
                                                     button 
                                                     key={subItem.text}
-                                                    sx={{ pl: 4 }}
+                                                    sx={{ 
+                                                        pl: 8,
+                                                        borderLeft: '2px solid #e0e0e0',
+                                                        marginLeft: 4,
+                                                        backgroundColor: router.pathname === subItem.path ? 'rgba(25, 118, 210, 0.08)' : 'transparent'
+                                                    }}
                                                     onClick={() => handleSubItemClick(subItem.path)}
                                                     selected={router.pathname === subItem.path}
                                                 >
-                                                    <ListItemText primary={subItem.text} />
+                                                    <ListItemText 
+                                                        primary={subItem.text} 
+                                                        sx={{ 
+                                                            fontSize: '0.9rem',
+                                                            color: router.pathname === subItem.path ? 'primary.main' : 'text.secondary'
+                                                        }}
+                                                    />
                                                 </ListItem>
                                             ))}
                                         </List>

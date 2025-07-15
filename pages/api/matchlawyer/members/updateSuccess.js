@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     }
 
     // 基本验证（详细验证应该在调用前完成）
-    if (benefitType && !['免费成员', '一星成员', '二星成员', '三星成员'].includes(benefitType)) {
+    if (benefitType && (typeof benefitType !== 'string' || benefitType.trim().length === 0)) {
       return res.status(400).json({ error: '权益类型无效' });
     }
 
