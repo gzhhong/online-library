@@ -59,6 +59,34 @@ export default async function handler(req, res) {
       errors.push('会员文字信息不能超过2000个字符');
     }
 
+    // 检查邮箱是否已被其他会员使用
+    if (email) {
+      const existingMemberByEmail = await prisma.member.findFirst({
+        where: { 
+          email,
+          id: { not: parseInt(id) }
+        }
+      });
+
+      if (existingMemberByEmail) {
+        errors.push('该邮箱已被其他会员注册');
+      }
+    }
+
+    // 检查手机号是否已被其他会员使用
+    if (phone) {
+      const existingMemberByPhone = await prisma.member.findFirst({
+        where: { 
+          phone,
+          id: { not: parseInt(id) }
+        }
+      });
+
+      if (existingMemberByPhone) {
+        errors.push('该手机号已被其他会员注册');
+      }
+    }
+
     if (errors.length > 0) {
       return res.status(400).json({ 
         error: '验证失败',

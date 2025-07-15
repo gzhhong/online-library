@@ -79,6 +79,28 @@ export default async function handler(req, res) {
       }
     }
 
+    // 检查邮箱是否已存在
+    if (email) {
+      const existingMemberByEmail = await prisma.member.findFirst({
+        where: { email }
+      });
+
+      if (existingMemberByEmail) {
+        errors.push('该邮箱已被注册');
+      }
+    }
+
+    // 检查手机号是否已存在
+    if (phone) {
+      const existingMemberByPhone = await prisma.member.findFirst({
+        where: { phone }
+      });
+
+      if (existingMemberByPhone) {
+        errors.push('该手机号已被注册');
+      }
+    }
+
     if (errors.length > 0) {
       return res.status(400).json({ 
         error: '验证失败',
