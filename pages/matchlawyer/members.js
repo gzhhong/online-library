@@ -48,7 +48,7 @@ export default function MembersPage() {
     return `${window.location.origin}/api/matchlawyer/files?file_id=${fileIdEncoded}`;
   }
 
-  // 加载会员列表
+  // 加载成员列表
   const loadMembers = async () => {
     try {
       const response = await fetch('/api/matchlawyer/members/list');
@@ -56,10 +56,10 @@ export default function MembersPage() {
         const result = await response.json();
         setMembers(result.data);
       } else {
-        toast.error('加载会员列表失败');
+        toast.error('加载成员列表失败');
       }
     } catch (error) {
-      toast.error('加载会员列表失败');
+      toast.error('加载成员列表失败');
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ export default function MembersPage() {
     loadIndustries();
   }, []);
 
-  // 查看会员详情
+  // 查看成员详情
   const handleViewMember = async (memberId) => {
     try {
       const response = await fetch(`/api/matchlawyer/members/detail?id=${memberId}`);
@@ -93,19 +93,19 @@ export default function MembersPage() {
         setEditMode(false);
         setDialogOpen(true);
       } else {
-        toast.error('获取会员详情失败');
+        toast.error('获取成员详情失败');
       }
     } catch (error) {
-      toast.error('获取会员详情失败');
+      toast.error('获取成员详情失败');
     }
   };
 
-  // 编辑会员
+  // 编辑成员
   const handleEditMember = () => {
     setEditMode(true);
   };
 
-  // 保存会员信息
+  // 保存成员信息
   const handleSaveMember = async () => {
     if (!selectedMember) return;
 
@@ -169,7 +169,7 @@ export default function MembersPage() {
         setSelectedMember(result.data);
         setEditMode(false);
         loadMembers(); // 重新加载列表
-        toast.success('会员信息更新成功');
+        toast.success('成员信息更新成功');
       } else {
         const error = await response.json();
         toast.error(error.error || '更新失败');
@@ -199,7 +199,7 @@ export default function MembersPage() {
         const result = await response.json();
         setSelectedMember(result.data);
         loadMembers(); // 重新加载列表
-        toast.success('会员审核通过');
+        toast.success('成员审核通过');
       } else {
         const error = await response.json();
         toast.error(error.error || '审核失败');
@@ -211,9 +211,9 @@ export default function MembersPage() {
     }
   };
 
-  // 删除会员
+  // 删除成员
   const handleDeleteMember = async (memberId) => {
-    if (!confirm('确定要删除这个会员吗？')) {
+    if (!confirm('确定要删除这个成员吗？')) {
       return;
     }
 
@@ -228,7 +228,7 @@ export default function MembersPage() {
           setDialogOpen(false);
           setSelectedMember(null);
         }
-        toast.success('会员删除成功');
+        toast.success('成员删除成功');
       } else {
         const error = await response.json();
         toast.error(error.error || '删除失败');
@@ -250,17 +250,17 @@ export default function MembersPage() {
   // 获取权益类型显示
   const getBenefitTypeDisplay = (benefitType) => {
     const colors = {
-      '免费': 'default',
-      '1级会员': 'primary',
-      '2级会员': 'secondary',
-      '3级会员': 'error'
+      '免费成员': 'default',
+      '一星成员': 'primary',
+      '二星成员': 'secondary',
+      '三星成员': 'error'
     };
     return <Chip label={benefitType} color={colors[benefitType] || 'default'} size="small" />;
   };
 
   // 获取付费状态显示
   const getPaidStatusDisplay = (isPaid, benefitType) => {
-    if (benefitType === '免费') return null;
+    if (benefitType === '免费成员') return null;
     return isPaid ? (
       <Chip label="已付费" color="success" size="small" />
     ) : (
@@ -282,7 +282,7 @@ export default function MembersPage() {
     <MatchLawyerLayout>
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          会员管理
+          成员管理
         </Typography>
 
         <Paper sx={{ mt: 2 }}>
@@ -337,7 +337,7 @@ export default function MembersPage() {
           fullWidth
         >
           <DialogTitle>
-            {editMode ? '编辑会员信息' : '会员详情'}
+            {editMode ? '编辑成员信息' : '成员详情'}
           </DialogTitle>
           <DialogContent>
             {selectedMember && (
@@ -389,10 +389,10 @@ export default function MembersPage() {
                         })}
                         disabled={!editMode}
                       >
-                        <MenuItem value="免费">免费</MenuItem>
-                        <MenuItem value="1级会员">1级会员</MenuItem>
-                        <MenuItem value="2级会员">2级会员</MenuItem>
-                        <MenuItem value="3级会员">3级会员</MenuItem>
+                        <MenuItem value="免费成员">免费成员</MenuItem>
+                        <MenuItem value="一星成员">一星成员</MenuItem>
+                        <MenuItem value="二星成员">二星成员</MenuItem>
+                        <MenuItem value="三星成员">三星成员</MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>
@@ -421,7 +421,7 @@ export default function MembersPage() {
                       disabled={!editMode}
                       margin="normal"
                     />
-                    {selectedMember.benefitType !== '免费' && (
+                    {selectedMember.benefitType !== '免费成员' && (
                       <FormControlLabel
                         control={
                           <Switch
@@ -443,7 +443,7 @@ export default function MembersPage() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="会员文字信息"
+                      label="成员文字信息"
                       value={selectedMember.description || ''}
                       onChange={(e) => setSelectedMember({
                         ...selectedMember,
@@ -485,7 +485,7 @@ export default function MembersPage() {
                   {selectedMember.imageTcpId && selectedMember.imageTcpId.length > 0 && (
                     <Grid item xs={12}>
                       <Typography variant="h6" gutterBottom>
-                        会员图片
+                        成员图片
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                         {selectedMember.imageTcpId.map((fileId, index) => (
@@ -567,7 +567,7 @@ export default function MembersPage() {
                   startIcon={<Delete />}
                   disabled={updating}
                 >
-                  {updating ? <CircularProgress size={20} /> : '删除会员'}
+                  {updating ? <CircularProgress size={20} /> : '删除成员'}
                 </Button>
                 <Button
                   onClick={() => setDialogOpen(false)}

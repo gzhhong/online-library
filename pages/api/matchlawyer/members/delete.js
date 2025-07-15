@@ -10,16 +10,16 @@ export default async function handler(req, res) {
     const { id } = req.query;
 
     if (!id) {
-      return res.status(400).json({ error: '会员ID是必需的' });
+      return res.status(400).json({ error: '成员ID是必需的' });
     }
 
-    // 检查会员是否存在
+    // 检查成员是否存在
     const member = await prisma.member.findUnique({
       where: { id: parseInt(id) }
     });
 
     if (!member) {
-      return res.status(404).json({ error: '会员不存在' });
+      return res.status(404).json({ error: '成员不存在' });
     }
 
     // 删除腾讯云上的图片文件
@@ -41,17 +41,17 @@ export default async function handler(req, res) {
       }
     }
 
-    // 删除会员
+    // 删除成员
     await prisma.member.delete({
       where: { id: parseInt(id) }
     });
 
     res.status(200).json({
-      message: '会员删除成功'
+      message: '成员删除成功'
     });
 
   } catch (error) {
-    console.error('删除会员错误:', error);
+    console.error('删除成员错误:', error);
     res.status(500).json({ error: '服务器内部错误' });
   }
 } 

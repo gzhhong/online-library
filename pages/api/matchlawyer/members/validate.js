@@ -1,4 +1,15 @@
-import { prisma } from '@/lib/db';
+import {
+  validateRequiredFields,
+  validateMemberType,
+  validateBenefitType,
+  validateEmailFormat,
+  validatePhoneFormat,
+  validateDescriptionLength,
+  validateLawyerIndustries,
+  checkIdNumberExists,
+  checkEmailExists,
+  checkPhoneExists
+} from '@/lib/memberValidation';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -23,83 +34,34 @@ export default async function handler(req, res) {
     const errors = [];
 
     // 验证必填字段
-    if (!type) errors.push('会员类型是必填字段');
-    if (!name) errors.push('名称是必填字段');
-    if (!idNumber) errors.push('ID是必填字段');
-    if (!benefitType) errors.push('权益类型是必填字段');
-    if (!email) errors.push('邮箱是必填字段');
-    if (!phone) errors.push('手机号是必填字段');
+    errors.push(...validateRequiredFields({ type, name, idNumber, benefitType, email, phone }));
 
-    // 验证会员类型
-    if (type && !['企业', '律师'].includes(type)) {
-      errors.push('会员类型必须是"企业"或"律师"');
-    }
+    // 验证各种格式和业务规则
+    const validationResults = [
+      validateMemberType(type),
+      validateBenefitType(benefitType),
+      validateEmailFormat(email),
+      validatePhoneFormat(phone),
+      validateDescriptionLength(description),
+      validateLawyerIndustries(type, industryIds)
+    ];
 
-    // 验证权益类型
-    if (benefitType && !['免费', '1级会员', '2级会员', '3级会员'].includes(benefitType)) {
-      errors.push('权益类型无效');
-    }
+    // 添加非空错误
+    validationResults.forEach(result => {
+      if (result) errors.push(result);
+    });
 
-    // 验证邮箱格式
-    if (email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        errors.push('邮箱格式无效');
-      }
-    }
+    // 检查唯一性（数据库查询）
+    const uniquenessChecks = [
+      await checkIdNumberExists(idNumber),
+      await checkEmailExists(email),
+      await checkPhoneExists(phone)
+    ];
 
-    // 验证手机号格式
-    if (phone) {
-      const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!phoneRegex.test(phone)) {
-        errors.push('手机号格式无效，请输入11位数字');
-      }
-    }
-
-    // 验证文字信息长度
-    if (description && description.length > 2000) {
-      errors.push('会员文字信息不能超过2000个字符');
-    }
-
-    // 验证律师必须选择行业标签
-    if (type === '律师') {
-      if (!industryIds || !Array.isArray(industryIds) || industryIds.length === 0) {
-        errors.push('律师必须选择行业标签');
-      }
-    }
-
-    // 检查ID是否已存在（仅在新注册时检查）
-    if (idNumber) {
-      const existingMember = await prisma.member.findUnique({
-        where: { idNumber }
-      });
-
-      if (existingMember) {
-        errors.push('该ID已存在');
-      }
-    }
-
-    // 检查邮箱是否已存在
-    if (email) {
-      const existingMemberByEmail = await prisma.member.findFirst({
-        where: { email }
-      });
-
-      if (existingMemberByEmail) {
-        errors.push('该邮箱已被注册');
-      }
-    }
-
-    // 检查手机号是否已存在
-    if (phone) {
-      const existingMemberByPhone = await prisma.member.findFirst({
-        where: { phone }
-      });
-
-      if (existingMemberByPhone) {
-        errors.push('该手机号已被注册');
-      }
-    }
+    // 添加唯一性错误
+    uniquenessChecks.forEach(result => {
+      if (result) errors.push(result);
+    });
 
     if (errors.length > 0) {
       return res.status(400).json({ 

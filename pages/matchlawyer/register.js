@@ -22,7 +22,7 @@ export default function RegisterPage() {
     type: '企业',
     name: '',
     idNumber: '',
-    benefitType: '免费',
+    benefitType: '免费成员',
     description: '',
     email: '',
     phone: '',
@@ -176,7 +176,7 @@ export default function RegisterPage() {
         }
       }
 
-      // 2. 调用注册成功API，创建会员记录
+      // 2. 调用注册成功API，创建成员记录
       const registerData = {
         type: formData.type,
         name: formData.name,
@@ -215,7 +215,7 @@ export default function RegisterPage() {
           type: '企业',
           name: '',
           idNumber: '',
-          benefitType: '免费',
+          benefitType: '免费成员',
           description: '',
           email: '',
           phone: '',
@@ -281,22 +281,22 @@ export default function RegisterPage() {
       }}>
         <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 600 }}>
           <Typography variant="h4" component="h1" gutterBottom align="center">
-            会员注册
+            成员注册
           </Typography>
           
           <Alert severity="info" sx={{ mb: 3 }}>
-            注册后需要等待管理员审核，审核通过后即可成为正式会员。
+            注册后需要等待管理员审核，审核通过后即可成为正式成员。
           </Alert>
 
           <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel>会员类型</InputLabel>
+                <InputLabel>成员类型</InputLabel>
                 <Select
                   value={formData.type}
                   onChange={(e) => setFormData({...formData, type: e.target.value})}
-                  label="会员类型"
+                  label="成员类型"
                 >
                   <MenuItem value="企业">企业</MenuItem>
                   <MenuItem value="律师">律师</MenuItem>
@@ -312,10 +312,10 @@ export default function RegisterPage() {
                   onChange={(e) => setFormData({...formData, benefitType: e.target.value})}
                   label="权益类型"
                 >
-                  <MenuItem value="免费">免费</MenuItem>
-                  <MenuItem value="1级会员">1级会员</MenuItem>
-                  <MenuItem value="2级会员">2级会员</MenuItem>
-                  <MenuItem value="3级会员">3级会员</MenuItem>
+                  <MenuItem value="免费成员">免费成员</MenuItem>
+                  <MenuItem value="一星成员">一星成员</MenuItem>
+                  <MenuItem value="二星成员">二星成员</MenuItem>
+                  <MenuItem value="三星成员">三星成员</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -380,7 +380,7 @@ export default function RegisterPage() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="会员文字信息"
+                label="成员文字信息"
                 multiline
                 rows={4}
                 value={formData.description}

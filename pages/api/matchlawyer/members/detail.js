@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   const { id } = req.query;
   if (!id) {
-    return res.status(400).json({ error: '会员ID是必需的' });
+    return res.status(400).json({ error: '成员ID是必需的' });
   }
 
   try {
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     });
 
     if (!member) {
-      return res.status(404).json({ error: '会员不存在' });
+      return res.status(404).json({ error: '成员不存在' });
     }
 
     // 获取行业标签信息
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('获取会员详情错误:', error);
+    console.error('获取成员详情错误:', error);
     res.status(500).json({ error: '服务器内部错误' });
   }
 } 

@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '缺少必填字段' });
     }
 
-    // 创建会员
+    // 创建成员
     const memberData = {
       type,
       name,
@@ -44,16 +44,16 @@ export default async function handler(req, res) {
       isPaid: false,
     };
 
-    console.log('准备创建会员数据:', memberData);
+    console.log('准备创建成员数据:', memberData);
 
     const member = await prisma.member.create({
       data: memberData
     });
 
-    console.log('会员创建成功:', member);
+    console.log('成员创建成功:', member);
 
     res.status(201).json({
-      message: '会员注册成功，等待审核',
+      message: '成员注册成功，等待审核',
       data: {
         id: member.id,
         name: member.name,
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('会员注册错误:', error);
+    console.error('成员注册错误:', error);
     res.status(500).json({ error: '服务器内部错误' });
   }
 } 
