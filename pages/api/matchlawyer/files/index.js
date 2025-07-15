@@ -3,7 +3,8 @@ import axios from 'axios';
 
 export default async function handler(req, res) {
   const { file_id } = req.query;
-  console.log('MatchLawyer file access request:', { file_id });
+  const fileIdDecoded = decodeURIComponent(file_id);
+  console.log('MatchLawyer file access request:', { fileIdDecoded });
 
   if (!file_id) {
     return res.status(400).json({ message: 'file_id is required' });
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
     }
 
     console.log('Requesting file download:', { 
-      file_id,
+      fileIdDecoded,
       env: process.env.CLOUD_ENV_ID 
     });
 
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
       {
         env: process.env.CLOUD_ENV_ID,
         file_list: [{
-          fileid: file_id,
+          fileid: fileIdDecoded,
           max_age: 3600  // 链接有效期1小时
         }]
       },

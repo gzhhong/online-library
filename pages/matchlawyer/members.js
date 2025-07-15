@@ -44,7 +44,8 @@ export default function MembersPage() {
   const [updating, setUpdating] = useState(false);
 
   function getFullUrl(fileId) {
-    return `${window.location.origin}/api/matchlawyer/files?file_id=${fileId}`;
+    const fileIdEncoded = encodeURIComponent(fileId);
+    return `${window.location.origin}/api/matchlawyer/files?file_id=${fileIdEncoded}`;
   }
 
   // 加载会员列表
