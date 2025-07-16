@@ -127,3 +127,20 @@ model Employee {
   // 关联关系
   role EmployeeRoles @relation(fields: [roleId], references: [id], onDelete: Restrict)
 }
+
+model MenuSetting {
+  id          String   @id @db.VarChar(12) // 12位随机字符
+  title       String   @db.VarChar(100) // 菜单标题
+  path        String   @db.VarChar(200) // 菜单路径
+  level       Int      @default(0) // 节点深度
+  index       Int      @default(0) // 同级节点中的顺序
+  icon        String?  @db.VarChar(100) // 图标名称（可以为空）
+  parentId    String?  @db.VarChar(12) // 父节点ID
+  roleIds     String   @db.Text // JSON格式存储可访问的角色ID数组
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 自关联关系
+  parent   MenuSetting?  @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children MenuSetting[] @relation("MenuHierarchy")
+}

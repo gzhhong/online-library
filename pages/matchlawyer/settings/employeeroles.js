@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import MatchLawyerLayout from '../../components/MatchLawyerLayout';
+import MatchLawyerLayout from '../../../components/MatchLawyerLayout';
 import {
   Box,
   Typography,
