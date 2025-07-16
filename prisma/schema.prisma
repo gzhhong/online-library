@@ -101,3 +101,28 @@ model BenefitGroup {
   // 关联关系
   benefitType BenefitType @relation(fields: [benefitTypeId], references: [id], onDelete: Restrict)
 }
+
+model EmployeeRoles {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(50) // 角色名称，如管理员、运维人员、普通用户
+  description String   @db.Text // 权限描述，如最高权限、运维权限、只读权限
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联关系
+  employees Employee[]
+}
+
+model Employee {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  email       String   @unique @db.VarChar(100)
+  phone       String   @unique @db.VarChar(20)
+  roleId      Int      // 引用EmployeeRoles的ID
+  status      Int      @default(1) // 1: 在职, 0: 离职
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联关系
+  role EmployeeRoles @relation(fields: [roleId], references: [id], onDelete: Restrict)
+}

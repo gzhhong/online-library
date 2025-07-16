@@ -16,7 +16,14 @@ export default function MatchLawyerLayout({ children }) {
                 { text: '用户数据', path: '/matchlawyer/benefit/userdata' }
             ]
         },
-        { text: '系统设置', icon: <Settings />, path: '/matchlawyer/settings' }
+        { 
+            text: '系统设置', 
+            icon: <Settings />, 
+            path: '/matchlawyer/settings',
+            subItems: [
+                { text: '角色设置', path: '/matchlawyer/employeeroles' }
+            ]
+        }
     ];
 
     return (
