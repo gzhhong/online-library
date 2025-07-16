@@ -21,9 +21,10 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: '角色不存在' });
     }
 
-    // 检查是否有员工正在使用这个角色
+    // 检查是否有员工正在使用这个角色（最多查找10个）
     const employeesUsingRole = await prisma.employee.findMany({
-      where: { roleId: parseInt(id) }
+      where: { roleId: parseInt(id) },
+      take: 10
     });
 
     if (employeesUsingRole.length > 0) {

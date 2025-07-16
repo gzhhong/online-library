@@ -21,7 +21,8 @@ export default function MatchLawyerLayout({ children }) {
             icon: <Settings />, 
             path: '/matchlawyer/settings',
             subItems: [
-                { text: '角色设置', path: '/matchlawyer/employeeroles' }
+                { text: '角色设置', path: '/matchlawyer/employeeroles' },
+                { text: '员工管理', path: '/matchlawyer/employee' }
             ]
         }
     ];

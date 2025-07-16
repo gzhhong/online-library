@@ -118,6 +118,7 @@ model Employee {
   name        String   @db.VarChar(100)
   email       String   @unique @db.VarChar(100)
   phone       String   @unique @db.VarChar(20)
+  password    String   @db.VarChar(255) // 加密后的密码
   roleId      Int      // 引用EmployeeRoles的ID
   status      Int      @default(1) // 1: 在职, 0: 离职
   createdAt   DateTime @default(now())

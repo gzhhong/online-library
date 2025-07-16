@@ -34,6 +34,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '角色名称已存在' });
     }
 
+    // 检查是否有员工正在使用这个角色
+    const employeesUsingRole = await prisma.employee.findMany({
+      where: { roleId: parseInt(id) },
+      take: 10
+    });
+
+    if (employeesUsingRole.length > 0) {
+      const employeeNames = employeesUsingRole.map(emp => emp.name).join('、');
+      return res.status(400).json({ 
+        error: `无法更新角色"${existingRole.name}"，该角色正在被以下员工使用：${employeeNames}` 
+      });
+    }
+
     // 更新角色
     const updatedRole = await prisma.employeeRoles.update({
       where: { id: parseInt(id) },
