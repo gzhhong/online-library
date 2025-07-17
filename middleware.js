@@ -7,6 +7,9 @@ export async function middleware(request) {
 
   // 检查是否访问管理员页面
   if (pathname.startsWith('/admin')) {
+    if (pathname === '/admin/login') {
+        return NextResponse.next();
+    }
 
     if (!token) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
@@ -21,6 +24,9 @@ export async function middleware(request) {
 
   // 检查是否访问MatchLawyer页面
   if (pathname.startsWith('/matchlawyer')) {
+    if (pathname === '/matchlawyer/login') {
+        return NextResponse.next();
+    }
     if (!token) {
         return NextResponse.redirect(new URL('/matchlawyer/login', request.url));
     }
