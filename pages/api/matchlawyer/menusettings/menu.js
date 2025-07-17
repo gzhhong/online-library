@@ -1,4 +1,4 @@
-import { getMenuForRole, getAllMenuSettings, buildMenuTree } from '@/lib/menuUtils';
+import { getMenuSettingsByRole, getAllMenuSettings, buildMenuTree } from '@/lib/menuUtils';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       }
     } else {
       // 否则根据roleId过滤菜单
-      const filteredMenuSettings = await getMenuForRole(tokenInfo.roleId);
+      const filteredMenuSettings = await getMenuSettingsByRole(tokenInfo.roleId);
       menuData = buildMenuTree(filteredMenuSettings);
       
       // 非超级管理员，如果菜单为空，返回空数组
