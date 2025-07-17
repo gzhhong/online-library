@@ -1,4 +1,4 @@
-import { getMenuForRole } from '@/lib/menuUtils';
+import { getMenuForRole, getAllMenuSettings, buildMenuTree } from '@/lib/menuUtils';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -6,31 +6,48 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { roleId } = req.query;
-
-    if (!roleId) {
-      return res.status(400).json({ error: '角色ID参数是必需的' });
+    // 从cookie中获取token
+    const token = req.cookies.token;
+    
+    if (!token) {
+      return res.status(401).json({ error: '未提供认证token' });
     }
 
-    // 图标映射函数
-    const iconMapper = (iconName) => {
-      // 这里可以根据需要扩展更多图标映射
-      const iconMap = {
-        'AccountTree': 'AccountTree',
-        'Settings': 'Settings',
-        'People': 'People',
-        'CardGiftcard': 'CardGiftcard',
-        'Logout': 'Logout'
-      };
-      return iconMap[iconName] || null;
-    };
+    // 验证token并获取用户信息
+    const { verifyTokenWithRole } = await import('@/lib/auth');
+    const tokenInfo = verifyTokenWithRole(token);
+    
+    if (!tokenInfo.isValid) {
+      return res.status(401).json({ error: 'token无效' });
+    }
 
-    // 使用menuUtils获取菜单数据
-    const menuItems = await getMenuForRole(parseInt(roleId), iconMapper);
+    let menuData;
+
+    if (tokenInfo.isSuperAdmin) {
+      // 如果是超级管理员，返回全部菜单
+      const allMenuSettings = await getAllMenuSettings();
+      menuData = buildMenuTree(allMenuSettings);
+      
+      // 如果菜单为空，超级管理员可以看到默认菜单
+      if (!menuData || menuData.length === 0) {
+        const { getDefaultMenuData } = await import('@/lib/defaultMenuData');
+        const defaultData = getDefaultMenuData();
+        menuData = buildMenuTree(defaultData.allMenus);
+      }
+    } else {
+      // 否则根据roleId过滤菜单
+      const filteredMenuSettings = await getMenuForRole(tokenInfo.roleId);
+      menuData = buildMenuTree(filteredMenuSettings);
+      
+      // 非超级管理员，如果菜单为空，返回空数组
+      if (!menuData || menuData.length === 0) {
+        menuData = [];
+      }
+    }
 
     res.status(200).json({
       success: true,
-      data: menuItems
+      data: menuData
     });
 
   } catch (error) {

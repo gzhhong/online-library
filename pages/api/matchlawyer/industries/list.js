@@ -24,9 +24,9 @@ export default async function handler(req, res) {
       
       const rootIndustry = await prisma.industry.create({
         data: {
-          id: '00000000000',
+          id: '000000000000',
           title: '法学',
-          description: '这是所有标签的根节点',
+          description: '这是根标签，请不要编辑或删除',
           level: 0,
           parentId: null
         },
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         }
       });
 
-      console.log('根节点创建成功:', rootIndustry);
+      console.log('根标签创建成功:', rootIndustry);
       industries = [rootIndustry];
     }
 

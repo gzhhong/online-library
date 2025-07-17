@@ -8,9 +8,8 @@ export default async function handler(req, res) {
   try {
     const menuSettings = await prisma.menuSetting.findMany({
       orderBy: [
-        { parentId: 'asc' },
-        { index: 'asc' },
-        { createdAt: 'asc' }
+        { level: 'asc' },
+        { index: 'asc' }
       ]
     });
 
