@@ -1,61 +1,40 @@
 import { NextResponse } from 'next/server';
 
-export function middleware(request) {
-  // 检查是否访问管理员页面
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    // 如果访问的是根路径 /admin
-    if (request.nextUrl.pathname === '/admin') {
-      // 先检查token
-      const token = request.cookies.get('token');
-      if (!token) {
-        // 没有token，重定向到登录页
-        return NextResponse.redirect(new URL('/admin/login', request.url));
-      }
-      // 有token，重定向到上传页面
-      return NextResponse.redirect(new URL('/admin/upload', request.url));
-    }
 
-    // 排除登录页面
-    if (request.nextUrl.pathname === '/admin/login') {
-      return NextResponse.next();
-    }
-
-    // 其他admin路径检查token
+export async function middleware(request) {
+    const { pathname } = request.nextUrl;
     const token = request.cookies.get('token');
+
+  // 检查是否访问管理员页面
+  if (pathname.startsWith('/admin')) {
+
     if (!token) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
+
+    // 如果访问的是根路径 /admin
+    if (pathname === '/admin') {
+        return NextResponse.redirect(new URL('/admin/upload', request.url));
+    }
+    return NextResponse.next();
   }
 
   // 检查是否访问MatchLawyer页面
-  if (request.nextUrl.pathname.startsWith('/matchlawyer')) {
-
-    // 如果访问的是根路径 /matchlawyer
-    if (request.nextUrl.pathname === '/matchlawyer') {
-      // 先检查token
-      const token = request.cookies.get('token');
-      if (!token) {
-        // 没有token，重定向到登录页
-        return NextResponse.redirect(new URL('/matchlawyer/login', request.url));
-      }
-      // 有token，重定向到首页或主页面
-      return NextResponse.redirect(new URL('/matchlawyer/industries', request.url));
-    }
-    // 排除登录页面，直接通过
-    if (request.nextUrl.pathname === '/matchlawyer/login') {
-        return NextResponse.next();
-      }
-  
-    // 其他matchlawyer路径检查token
-    const token = request.cookies.get('token');
+  if (pathname.startsWith('/matchlawyer')) {
     if (!token) {
-      return NextResponse.redirect(new URL('/matchlawyer/login', request.url));
+        return NextResponse.redirect(new URL('/matchlawyer/login', request.url));
     }
+    // 如果访问的是根路径 /matchlawyer
+    if (pathname === '/matchlawyer') {
+        return NextResponse.redirect(new URL('/matchlawyer/industries', request.url));
+    }
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
 }
 
 export const config = {
+    // 匹配admin和matchlawyer路径，只处理页面
+    // 不处理api路径
   matcher: ['/admin/:path*', '/matchlawyer/:path*']
 }; 

@@ -178,3 +178,17 @@ REFERENCES Industry(id)
 ON DELETE SET NULL
 );
 建表
+
+为什么 Middleware 不能直接修改 request.headers？
+
+- Middleware 和 API Route/Server Action 属于两套独立上下文：
+  Middleware 使用的是 NextRequest 和 NextResponse 对象（基于 Edge Runtime）。
+  API Route 和 Server Action 使用的是 Node.js 环境的 Request 对象。
+  两者之间通过网络“桥接”，而非共享内存或对象：
+  当 middleware 返回 NextResponse.next() 时，它只是告诉系统：“继续处理这个请求”。
+  系统内部会把浏览器发过来的请求重新分发给 API Route 或 Server Action。
+  这个分发过程不会自动带上 middleware 里修改过的 header，除非你明确通过：
+  request.headers.set()（仅在 Middleware 内 fetch 请求有效）
+  或通过 response.headers.set()（返回给客户端）
+
+在这一点上，Next 框架和 Go 的 web 框架有巨大区别。Go 是可以在 middleware 里面解析 token 并增加 header 的。
