@@ -71,8 +71,9 @@ model Member {
   industryIds String?  @db.Text // JSON格式存储行业标签ID数组，仅律师用
   status      Int      @default(0) // 0: 待审核, 1: 正式成员
   isPaid      Boolean  @default(false)
-  isStopped   Boolean  @default(false)
+  isStopped   Boolean? @default(false)
   password    String   @default("temp_password") @db.VarChar(20)
+  openId      String?  @db.VarChar(100)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
