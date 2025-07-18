@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { withAuth } from '@/lib/auth';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   console.log('Member image upload handler started');
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -56,3 +57,5 @@ export default async function handler(req, res) {
     });
   }
 } 
+
+export default withAuth(handler, '/matchlawyer/members');

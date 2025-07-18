@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
-
-export async function middleware(request) {
+export function middleware(request) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get('token');
 
@@ -37,6 +36,7 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  return NextResponse.next();
 }
 
 export const config = {

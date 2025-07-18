@@ -10,8 +10,9 @@ import {
   checkEmailExists,
   checkPhoneExists
 } from '@/lib/memberValidation';
+import { withAuth } from '@/lib/auth';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -81,3 +82,5 @@ export default async function handler(req, res) {
     res.status(500).json({ error: '服务器内部错误' });
   }
 } 
+
+export default withAuth(handler, '/matchlawyer/members');
