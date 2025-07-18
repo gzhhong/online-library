@@ -33,7 +33,7 @@ import {
 } from '@mui/material';
 import { Visibility, Edit, CheckCircle, Delete } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
-import { useBenefitTypes } from '../../lib/useBenefitTypes';
+import { useBenefitGroups } from '../../lib/useBenefitGroups';
 
 export default function MembersPage() {
   const [members, setMembers] = useState([]);
@@ -45,7 +45,7 @@ export default function MembersPage() {
   const [updating, setUpdating] = useState(false);
   
   // 使用自定义hook获取权益类型
-  const { benefitTypes, loading: benefitTypesLoading, error: benefitTypesError } = useBenefitTypes();
+  const { benefitGroups, loading: benefitGroupsLoading, error: benefitGroupsError } = useBenefitGroups();
 
   function getFullUrl(fileId) {
     const fileIdEncoded = encodeURIComponent(fileId);
@@ -118,7 +118,7 @@ export default function MembersPage() {
       // 1. 先进行验证
       const validationData = {
         id: selectedMember.id,
-        benefitType: selectedMember.benefitType,
+        benefitGroup: selectedMember.benefitGroup,
         description: selectedMember.description || '',
         email: selectedMember.email,
         phone: selectedMember.phone
@@ -146,7 +146,7 @@ export default function MembersPage() {
       // 2. 验证通过后，进行更新
       const updateData = {
         id: selectedMember.id,
-        benefitType: selectedMember.benefitType,
+        benefitGroup: selectedMember.benefitGroup,
         description: selectedMember.description || '',
         email: selectedMember.email,
         phone: selectedMember.phone,
@@ -252,19 +252,19 @@ export default function MembersPage() {
   };
 
   // 获取权益类型显示
-  const getBenefitTypeDisplay = (benefitType) => {
+  const getBenefitGroupDisplay = (benefitGroup) => {
     // 动态颜色映射，基于权益类型在列表中的位置
     const colors = ['default', 'primary', 'secondary', 'error', 'warning', 'info'];
-    const index = benefitTypes.indexOf(benefitType);
+    const index = benefitGroups.indexOf(benefitGroup);
     const color = colors[index % colors.length] || 'default';
-    return <Chip label={benefitType} color={color} size="small" />;
+    return <Chip label={benefitGroup} color={color} size="small" />;
   };
 
   // 获取付费状态显示
-  const getPaidStatusDisplay = (isPaid, benefitType) => {
+  const getPaidStatusDisplay = (isPaid, benefitGroup) => {
     // 这里需要根据实际的权益类型来判断是否为免费类型
     // 暂时保持原有逻辑，后续可以根据BenefitGroup的price字段来判断
-    if (benefitType && benefitType.includes('免费')) return null;
+    if (benefitGroup && benefitGroup.includes('免费')) return null;
     return isPaid ? (
       <Chip label="已付费" color="success" size="small" />
     ) : (
@@ -289,9 +289,9 @@ export default function MembersPage() {
           成员管理
         </Typography>
         
-        {benefitTypesError && (
+        {benefitGroupsError && (
           <Alert severity="error" sx={{ mb: 3 }}>
-            加载权益类型失败: {benefitTypesError}
+            加载权益类型失败: {benefitGroupsError}
           </Alert>
         )}
 
@@ -313,8 +313,8 @@ export default function MembersPage() {
                   <TableRow key={member.id}>
                     <TableCell>{member.name}</TableCell>
                     <TableCell>{member.type}</TableCell>
-                    <TableCell>{getBenefitTypeDisplay(member.benefitType)}</TableCell>
-                    <TableCell>{getPaidStatusDisplay(member.isPaid, member.benefitType)}</TableCell>
+                    <TableCell>{getBenefitGroupDisplay(member.benefitGroup)}</TableCell>
+                    <TableCell>{getPaidStatusDisplay(member.isPaid, member.benefitGroup)}</TableCell>
                     <TableCell>{getStatusDisplay(member.status)}</TableCell>
                     <TableCell>
                       <IconButton
@@ -392,19 +392,19 @@ export default function MembersPage() {
                     <FormControl fullWidth margin="normal">
                         <InputLabel>权益类型</InputLabel>
                         <Select
-                          value={selectedMember.benefitType}
+                          value={selectedMember.benefitGroup}
                           onChange={(e) => setSelectedMember({
                             ...selectedMember,
-                            benefitType: e.target.value
+                            benefitGroup: e.target.value
                           })}
-                          disabled={!editMode || benefitTypesLoading}
+                          disabled={!editMode || benefitGroupsLoading}
                         >
-                          {benefitTypesLoading ? (
+                          {benefitGroupsLoading ? (
                             <MenuItem disabled>加载中...</MenuItem>
                           ) : (
-                            benefitTypes.map((type, index) => (
-                              <MenuItem key={index} value={type}>
-                                {type}
+                            benefitGroups.map((group, index) => (
+                              <MenuItem key={index} value={group}>
+                                {group}
                               </MenuItem>
                             ))
                           )}
@@ -436,7 +436,7 @@ export default function MembersPage() {
                       disabled={!editMode}
                       margin="normal"
                     />
-                    {selectedMember.benefitType !== '免费成员' && (
+                    {selectedMember.benefitGroup !== '免费成员' && (
                       <FormControlLabel
                         control={
                           <Switch

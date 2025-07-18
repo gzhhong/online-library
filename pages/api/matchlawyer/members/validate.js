@@ -24,7 +24,7 @@ async function handler(req, res) {
       type, 
       name, 
       idNumber, 
-      benefitType, 
+      benefitGroup, 
       description, 
       email, 
       phone, 
@@ -35,12 +35,12 @@ async function handler(req, res) {
     const errors = [];
 
     // 验证必填字段
-    errors.push(...validateRequiredFields({ type, name, idNumber, benefitType, email, phone }));
+    errors.push(...validateRequiredFields({ type, name, idNumber, benefitGroup, email, phone }));
 
     // 验证各种格式和业务规则
     const validationResults = [
       validateMemberType(type),
-      validateBenefitType(benefitType),
+      validateBenefitType(benefitGroup),
       validateEmailFormat(email),
       validatePhoneFormat(phone),
       validateDescriptionLength(description),

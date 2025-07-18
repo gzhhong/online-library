@@ -42,7 +42,7 @@ async function handler(req, res) {
       type: member.type,
       name: member.name,
       idNumber: member.idNumber,
-      benefitType: member.benefitType,
+      benefitGroup: member.benefitGroup,
       description: member.description,
       email: member.email,
       phone: member.phone,

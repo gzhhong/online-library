@@ -61,7 +61,7 @@ model Member {
   type        String   @db.VarChar(20) // 企业或律师
   name        String   @db.VarChar(100)
   idNumber    String   @unique @db.VarChar(50)
-  benefitType String   @db.VarChar(20)
+  benefitGroup String  @db.VarChar(100)
   description String?  @db.Text
   email       String   @unique @db.VarChar(100)
   phone       String   @unique @db.VarChar(20)
@@ -76,6 +76,9 @@ model Member {
   openId      String?  @db.VarChar(100)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // 关联关系
+  benefitConsumed BenefitConsumed[]
 }
 
 model BenefitType {
@@ -85,11 +88,12 @@ model BenefitType {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   BenefitGroup BenefitGroup[]
+  benefitConsumed BenefitConsumed[]
 }
 
 model BenefitGroup {
   id            Int      @id @default(autoincrement())
-  groupId       String   @db.VarChar(6) // 6位随机字符，全大写
+  groupId       String   @db.VarChar(6) // 6位随机字符，全大写，不唯一
   title         String   @db.VarChar(100)
   benefitTypeId String   @db.VarChar(6)
   times         Int      @default(1) // 次数
@@ -101,6 +105,27 @@ model BenefitGroup {
 
   // 关联关系
   benefitType BenefitType @relation(fields: [benefitTypeId], references: [id], onDelete: Restrict)
+}
+
+model BenefitConsumed {
+  id           Int      @id @default(autoincrement())
+  memberId     Int      // 用户ID
+  memberName   String   @db.VarChar(100) // 用户姓名
+  memberType   String   @db.VarChar(20) // 用户类型（企业或律师）
+  benefitGroup String  @db.VarChar(100) // 用户所属权益分组
+  benefitTypeId String  @db.VarChar(6) // 权益类型ID
+  benefitTitle String   @db.VarChar(100) // 权益标题
+  benefitIsPaid Boolean @default(false) // 权益是否付费
+  usedCount    Int      @default(0) // 已使用次数
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // 关联关系
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  benefitTypeRef BenefitType @relation(fields: [benefitTypeId], references: [id], onDelete: Cascade)
+
+  // 复合唯一约束：用户ID和权益类型ID的组合必须唯一
+  @@unique([memberId, benefitTypeId])
 }
 
 model EmployeeRoles {

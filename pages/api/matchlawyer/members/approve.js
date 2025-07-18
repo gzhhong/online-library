@@ -53,7 +53,7 @@ async function handler(req, res) {
       type: updatedMember.type,
       name: updatedMember.name,
       idNumber: updatedMember.idNumber,
-      benefitType: updatedMember.benefitType,
+      benefitGroup: updatedMember.benefitGroup,
       description: updatedMember.description,
       email: updatedMember.email,
       phone: updatedMember.phone,

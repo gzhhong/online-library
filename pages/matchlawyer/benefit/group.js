@@ -123,7 +123,7 @@ export default function BenefitGroupPage() {
       });
 
       if (response.ok) {
-        toast.success('权益分组删除成功');
+        toast.success('权益项删除成功');
         loadBenefitGroups();
       } else {
         const error = await response.json();

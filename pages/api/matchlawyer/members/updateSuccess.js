@@ -11,7 +11,7 @@ async function handler(req, res) {
   try {
     const { 
       id,
-      benefitType, 
+      benefitGroup, 
       description, 
       email, 
       phone, 
@@ -36,15 +36,15 @@ async function handler(req, res) {
     }
 
     // 基本验证（详细验证应该在调用前完成）
-    if (benefitType && (typeof benefitType !== 'string' || benefitType.trim().length === 0)) {
-      return res.status(400).json({ error: '权益类型无效' });
+    if (benefitGroup && (typeof benefitGroup !== 'string' || benefitGroup.trim().length === 0)) {
+      return res.status(400).json({ error: '权益组类型无效' });
     }
 
     // 准备更新数据
     const updateData = {};
     
-    if (benefitType !== undefined) {
-      updateData.benefitType = benefitType;
+    if (benefitGroup !== undefined) {
+      updateData.benefitGroup = benefitGroup;
     }
     
     if (description !== undefined) {
@@ -93,7 +93,7 @@ async function handler(req, res) {
       type: updatedMember.type,
       name: updatedMember.name,
       idNumber: updatedMember.idNumber,
-      benefitType: updatedMember.benefitType,
+      benefitGroup: updatedMember.benefitGroup,
       description: updatedMember.description,
       email: updatedMember.email,
       phone: updatedMember.phone,

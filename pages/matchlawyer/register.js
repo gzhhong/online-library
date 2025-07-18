@@ -16,14 +16,14 @@ import {
   CircularProgress
 } from '@mui/material';
 import { toast } from 'react-hot-toast';
-import { useBenefitTypes } from '../../lib/useBenefitTypes';
+import { useBenefitGroups } from '../../lib/useBenefitGroups';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     type: '企业',
     name: '',
     idNumber: '',
-    benefitType: '',
+    benefitGroup: '',
     description: '',
     email: '',
     phone: '',
@@ -36,7 +36,7 @@ export default function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   
   // 使用自定义hook获取权益类型
-  const { benefitTypes, loading: benefitTypesLoading, error: benefitTypesError } = useBenefitTypes();
+  const { benefitGroups, loading: benefitGroupsLoading, error: benefitGroupsError } = useBenefitGroups();
 
   const MAX_FILE_SIZE = 80 * 1024; // 80KB
   const MAX_IMAGES = 3;
@@ -60,10 +60,10 @@ export default function RegisterPage() {
 
   // 设置默认权益类型
   useEffect(() => {
-    if (benefitTypes.length > 0 && !formData.benefitType) {
-      setFormData(prev => ({ ...prev, benefitType: benefitTypes[0] }));
+    if (benefitGroups.length > 0 && !formData.benefitGroup) {
+      setFormData(prev => ({ ...prev, benefitGroup: benefitGroups[0] }));
     }
-  }, [benefitTypes, formData.benefitType]);
+  }, [benefitGroups, formData.benefitGroup]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -111,7 +111,7 @@ export default function RegisterPage() {
         type: formData.type,
         name: formData.name,
         idNumber: formData.idNumber,
-        benefitType: formData.benefitType,
+        benefitGroup: formData.benefitGroup,
         description: formData.description,
         email: formData.email,
         phone: formData.phone,
@@ -192,7 +192,7 @@ export default function RegisterPage() {
         type: formData.type,
         name: formData.name,
         idNumber: formData.idNumber,
-        benefitType: formData.benefitType,
+        benefitGroup: formData.benefitGroup,
         description: formData.description,
         email: formData.email,
         phone: formData.phone,
@@ -226,7 +226,7 @@ export default function RegisterPage() {
           type: '企业',
           name: '',
           idNumber: '',
-          benefitType: '',
+          benefitGroup: '',
           description: '',
           email: '',
           phone: '',
@@ -299,9 +299,9 @@ export default function RegisterPage() {
             注册后需要等待管理员审核，审核通过后即可成为正式成员。
           </Alert>
           
-          {benefitTypesError && (
+          {benefitGroupsError && (
             <Alert severity="error" sx={{ mb: 3 }}>
-              加载权益类型失败: {benefitTypesError}
+              加载权益类型失败: {benefitGroupsError}
             </Alert>
           )}
 
@@ -325,17 +325,17 @@ export default function RegisterPage() {
               <FormControl fullWidth>
                 <InputLabel>权益类型</InputLabel>
                 <Select
-                  value={formData.benefitType}
-                  onChange={(e) => setFormData({...formData, benefitType: e.target.value})}
+                  value={formData.benefitGroup}
+                  onChange={(e) => setFormData({...formData, benefitGroup: e.target.value})}
                   label="权益类型"
-                  disabled={benefitTypesLoading}
+                  disabled={benefitGroupsLoading}
                 >
-                  {benefitTypesLoading ? (
+                  {benefitGroupsLoading ? (
                     <MenuItem disabled>加载中...</MenuItem>
                   ) : (
-                    benefitTypes.map((type, index) => (
-                      <MenuItem key={index} value={type}>
-                        {type}
+                    benefitGroups.map((group, index) => (
+                      <MenuItem key={index} value={group}>
+                        {group}
                       </MenuItem>
                     ))
                   )}

@@ -14,7 +14,7 @@ async function handler(req, res) {
       type, 
       name, 
       idNumber, 
-      benefitType, 
+      benefitGroup, 
       description, 
       email, 
       phone, 
@@ -25,7 +25,7 @@ async function handler(req, res) {
     } = req.body;
 
     // 数据已经在validate API中验证过，这里只做基本检查
-    if (!type || !name || !idNumber || !benefitType || !email || !phone) {
+    if (!type || !name || !idNumber || !benefitGroup || !email || !phone) {
       return res.status(400).json({ error: '缺少必填字段' });
     }
 
@@ -34,7 +34,7 @@ async function handler(req, res) {
       type,
       name,
       idNumber,
-      benefitType,
+      benefitGroup,
       description: description || null,
       email,
       phone,

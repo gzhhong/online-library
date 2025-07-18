@@ -22,6 +22,15 @@ async function handler(req, res) {
       return res.status(404).json({ error: '权益组不存在' });
     }
 
+    // 检查是否有成员正在使用这个权益分组
+    const membersUsingGroup = await prisma.member.findFirst({
+      where: { benefitGroup: existingGroup.title }
+    });
+
+    if (membersUsingGroup) {
+      return res.status(400).json({ error: '无法删除权益分组，有成员正在使用此分组' });
+    }
+
     // 删除该组的所有记录（包括组标题和所有权益项）
     await prisma.benefitGroup.deleteMany({
       where: { groupId }

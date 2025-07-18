@@ -20,7 +20,7 @@ async function handler(req, res) {
   try {
     const { 
       id,
-      benefitType, 
+      benefitGroup, 
       description, 
       email, 
       phone 
@@ -36,7 +36,7 @@ async function handler(req, res) {
 
     // 验证各种格式和业务规则
     const validationResults = [
-      validateBenefitType(benefitType),
+      validateBenefitType(benefitGroup),
       validateEmailFormat(email),
       validatePhoneFormat(phone),
       validateDescriptionLength(description)
