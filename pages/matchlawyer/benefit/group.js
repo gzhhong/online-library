@@ -29,10 +29,12 @@ export default function BenefitGroupPage() {
   const [benefitTypes, setBenefitTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
+  const [editingGroupId, setEditingGroupId] = useState(null); // 编辑组信息的ID
   const [saving, setSaving] = useState(false);
   const [newGroup, setNewGroup] = useState({
     title: '',
-    notShow: false
+    notShow: false,
+    forWhom: '律师' // 默认选择律师
   });
   const [newItem, setNewItem] = useState({
     benefitTypeId: '',
@@ -82,6 +84,43 @@ export default function BenefitGroupPage() {
   // 开始编辑
   const handleEdit = (item) => {
     setEditingId(item.id);
+  };
+
+  // 开始编辑组信息
+  const handleEditGroup = (groupId) => {
+    setEditingGroupId(groupId);
+  };
+
+  // 保存组信息编辑
+  const handleSaveGroup = async (group) => {
+    setSaving(true);
+    try {
+      const response = await fetch('/api/matchlawyer/benefit/benefitgroup/updateGroup', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          groupId: group.groupId,
+          title: group.title,
+          notShow: group.notShow,
+          forWhom: group.forWhom
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('权益组信息更新成功');
+        setEditingGroupId(null);
+        loadBenefitGroups();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || '更新失败');
+      }
+    } catch (error) {
+      toast.error('更新失败');
+    } finally {
+      setSaving(false);
+    }
   };
 
   // 保存编辑
@@ -175,6 +214,7 @@ export default function BenefitGroupPage() {
       groupId: tempGroupId,
       title: newGroup.title,
       notShow: newGroup.notShow,
+      forWhom: newGroup.forWhom,
       price: 0,
       items: [],
       isTemp: true // 标记为临时组
@@ -185,7 +225,8 @@ export default function BenefitGroupPage() {
     // 清空表单
     setNewGroup({
       title: '',
-      notShow: false
+      notShow: false,
+      forWhom: '律师' // 重置为默认值
     });
     
     toast.success('权益组已创建，请添加权益项并保存');
@@ -217,6 +258,7 @@ export default function BenefitGroupPage() {
         body: JSON.stringify({
           groupTitle: tempGroup.title,
           groupNotShow: tempGroup.notShow,
+          forWhom: tempGroup.forWhom,
           benefitTypeId: formData.benefitTypeId,
           times: formData.times,
           description: formData.description,
@@ -277,6 +319,7 @@ export default function BenefitGroupPage() {
         body: JSON.stringify({
           groupTitle: existingGroup.title,
           groupNotShow: existingGroup.notShow,
+          forWhom: existingGroup.forWhom,
           benefitTypeId: formData.benefitTypeId,
           times: formData.times,
           description: formData.description,
@@ -315,6 +358,19 @@ export default function BenefitGroupPage() {
           items: group.items.map(item => 
             item.id === itemId ? { ...item, [field]: value } : item
           )
+        };
+      }
+      return group;
+    }));
+  };
+
+  // 更新编辑中的组信息
+  const updateEditingGroup = (groupId, field, value) => {
+    setBenefitGroups(prev => prev.map(group => {
+      if (group.groupId === groupId) {
+        return {
+          ...group,
+          [field]: value
         };
       }
       return group;
@@ -394,7 +450,7 @@ export default function BenefitGroupPage() {
             增加权益组
           </Typography>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 label="标题"
@@ -402,6 +458,19 @@ export default function BenefitGroupPage() {
                 onChange={(e) => updateNewGroup('title', e.target.value)}
                 placeholder="如：免费成员"
               />
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>适用对象</InputLabel>
+                <Select
+                  value={newGroup.forWhom}
+                  onChange={(e) => updateNewGroup('forWhom', e.target.value)}
+                  label="适用对象"
+                >
+                  <MenuItem value="企业">企业</MenuItem>
+                  <MenuItem value="律师">律师</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12} md={2}>
               <FormControlLabel
@@ -439,20 +508,93 @@ export default function BenefitGroupPage() {
                 <Card>
                   <CardContent>
                     <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                      <Typography variant="h6">
-                        {group.isTemp ? '[临时] ' : ''}权益组：{group.title} (总价：¥{group.price || 0})
-                      </Typography>
-                      {!group.isTemp && (
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          startIcon={<Delete />}
-                          onClick={() => handleDeleteGroup(group.groupId, group.title)}
-                          title="删除整个权益组"
-                        >
-                          删除组
-                        </Button>
+                      <Box sx={{ flex: 1 }}>
+                        {editingGroupId === group.groupId ? (
+                          <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={12} md={4}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                label="组标题"
+                                value={group.title}
+                                onChange={(e) => updateEditingGroup(group.groupId, 'title', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                              <FormControl fullWidth size="small">
+                                <InputLabel>适用对象</InputLabel>
+                                <Select
+                                  value={group.forWhom || '律师'}
+                                  onChange={(e) => updateEditingGroup(group.groupId, 'forWhom', e.target.value)}
+                                  label="适用对象"
+                                >
+                                  <MenuItem value="企业">企业</MenuItem>
+                                  <MenuItem value="律师">律师</MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Grid>
+                            <Grid item xs={12} md={2}>
+                              <FormControlLabel
+                                control={
+                                  <Switch
+                                    checked={group.notShow || false}
+                                    onChange={(e) => updateEditingGroup(group.groupId, 'notShow', e.target.checked)}
+                                    size="small"
+                                  />
+                                }
+                                label="隐藏"
+                              />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                              <Box display="flex" gap={1}>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  onClick={() => handleSaveGroup(group)}
+                                  disabled={saving}
+                                  startIcon={saving ? <CircularProgress size={16} /> : <Save />}
+                                >
+                                  保存
+                                </Button>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  onClick={() => setEditingGroupId(null)}
+                                  disabled={saving}
+                                >
+                                  取消
+                                </Button>
+                              </Box>
+                            </Grid>
+                          </Grid>
+                        ) : (
+                          <Typography variant="h6">
+                            {group.isTemp ? '[临时] ' : ''}权益组：{group.title} (适用：{group.forWhom || '未设置'}, 总价：¥{group.price || 0})
+                          </Typography>
+                        )}
+                      </Box>
+                      {!group.isTemp && editingGroupId !== group.groupId && (
+                        <Box display="flex" gap={1}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<Edit />}
+                            onClick={() => handleEditGroup(group.groupId)}
+                            title="编辑组信息"
+                          >
+                            编辑组
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            startIcon={<Delete />}
+                            onClick={() => handleDeleteGroup(group.groupId, group.title)}
+                            title="删除整个权益组"
+                          >
+                            删除组
+                          </Button>
+                        </Box>
                       )}
                     </Box>
                     

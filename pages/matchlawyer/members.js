@@ -46,6 +46,11 @@ export default function MembersPage() {
   
   // 使用自定义hook获取权益类型
   const { benefitGroups, loading: benefitGroupsLoading, error: benefitGroupsError } = useBenefitGroups();
+  
+  // 根据成员类型过滤权益分组
+  const filteredBenefitGroups = selectedMember 
+    ? benefitGroups.filter(group => group.forWhom === selectedMember.type)
+    : benefitGroups;
 
   function getFullUrl(fileId) {
     const fileIdEncoded = encodeURIComponent(fileId);
@@ -402,9 +407,9 @@ export default function MembersPage() {
                           {benefitGroupsLoading ? (
                             <MenuItem disabled>加载中...</MenuItem>
                           ) : (
-                            benefitGroups.map((group, index) => (
-                              <MenuItem key={index} value={group}>
-                                {group}
+                            filteredBenefitGroups.map((group, index) => (
+                              <MenuItem key={index} value={group.title}>
+                                {group.title}
                               </MenuItem>
                             ))
                           )}
@@ -436,7 +441,7 @@ export default function MembersPage() {
                       disabled={!editMode}
                       margin="normal"
                     />
-                    {selectedMember.benefitGroup !== '免费成员' && (
+                    {selectedMember.benefitGroup && !selectedMember.benefitGroup.includes('免费') && (
                       <FormControlLabel
                         control={
                           <Switch

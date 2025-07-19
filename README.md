@@ -192,3 +192,25 @@ ON DELETE SET NULL
   或通过 response.headers.set()（返回给客户端）
 
 在这一点上，Next 框架和 Go 的 web 框架有巨大区别。Go 是可以在 middleware 里面解析 token 并增加 header 的。
+
+icons 的参考位置https://mui.com/material-ui/material-icons/
+
+部署过程
+
+- 建立所有的表格，可以使用 npx prisma migrate deploy，也可以把 model 转换为 sql 语句执行建表的过程
+- init 数据，以操作本地数据库为例，在启动服务之后，执行：
+
+```
+curl -c cookies.txt -X POST http://localhost:3000/api/matchlawyer/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@example.com", "password": "your_secure_password"}'
+```
+
+以及
+
+```
+curl -b cookies.txt -X POST http://localhost:3000/api/matchlawyer/menusettings/init
+```
+
+- 增加角色
+- 设置角色到权限控制页面的各个节点上。

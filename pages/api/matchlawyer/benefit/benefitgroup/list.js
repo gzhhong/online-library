@@ -33,6 +33,7 @@ async function handler(req, res) {
           groupId: group.groupId,
           title: group.title,
           notShow: group.notShow,
+          forWhom: group.forWhom,
           price: totalPrice, // 使用计算出的总价格
           createdAt: group.createdAt,
           updatedAt: group.updatedAt,

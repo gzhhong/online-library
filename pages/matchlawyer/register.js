@@ -37,6 +37,9 @@ export default function RegisterPage() {
   
   // 使用自定义hook获取权益类型
   const { benefitGroups, loading: benefitGroupsLoading, error: benefitGroupsError } = useBenefitGroups();
+  
+  // 根据用户类型过滤权益分组
+  const filteredBenefitGroups = benefitGroups.filter(group => group.forWhom === formData.type);
 
   const MAX_FILE_SIZE = 80 * 1024; // 80KB
   const MAX_IMAGES = 3;
@@ -60,10 +63,10 @@ export default function RegisterPage() {
 
   // 设置默认权益类型
   useEffect(() => {
-    if (benefitGroups.length > 0 && !formData.benefitGroup) {
-      setFormData(prev => ({ ...prev, benefitGroup: benefitGroups[0] }));
+    if (filteredBenefitGroups.length > 0 && !formData.benefitGroup) {
+      setFormData(prev => ({ ...prev, benefitGroup: filteredBenefitGroups[0].title }));
     }
-  }, [benefitGroups, formData.benefitGroup]);
+  }, [filteredBenefitGroups, formData.benefitGroup]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -333,9 +336,9 @@ export default function RegisterPage() {
                   {benefitGroupsLoading ? (
                     <MenuItem disabled>加载中...</MenuItem>
                   ) : (
-                    benefitGroups.map((group, index) => (
-                      <MenuItem key={index} value={group}>
-                        {group}
+                    filteredBenefitGroups.map((group, index) => (
+                      <MenuItem key={index} value={group.title}>
+                        {group.title}
                       </MenuItem>
                     ))
                   )}

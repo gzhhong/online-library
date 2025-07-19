@@ -16,7 +16,8 @@ async function handler(req, res) {
       description, 
       price, 
       notShow,
-      existingGroupId 
+      existingGroupId,
+      forWhom
     } = req.body;
 
     // 验证组标题
@@ -69,7 +70,8 @@ async function handler(req, res) {
         times: times || 1,
         description: description || null,
         price: price || 0,
-        notShow: notShow || false
+        notShow: notShow || false,
+        forWhom: forWhom || "律师"
       },
       include: {
         benefitType: true

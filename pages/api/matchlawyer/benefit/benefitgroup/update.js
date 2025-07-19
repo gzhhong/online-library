@@ -12,7 +12,7 @@ async function handler(req, res) {
   }
 
   try {
-    const { id, title, benefitTypeId, times, description, price, notShow } = req.body;
+    const { id, title, benefitTypeId, times, description, price, notShow, forWhom } = req.body;
 
     // 验证数据
     const validationErrors = validateBenefitGroupUpdate({ id, title, benefitTypeId, times, price });
@@ -38,7 +38,8 @@ async function handler(req, res) {
         times: times || existingBenefitGroup.times,
         description: description !== undefined ? description : existingBenefitGroup.description,
         price: price !== undefined ? price : existingBenefitGroup.price,
-        notShow: notShow !== undefined ? notShow : existingBenefitGroup.notShow
+        notShow: notShow !== undefined ? notShow : existingBenefitGroup.notShow,
+        forWhom: forWhom !== undefined ? forWhom : existingBenefitGroup.forWhom
       },
       include: {
         benefitType: true

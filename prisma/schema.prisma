@@ -79,6 +79,7 @@ model Member {
 
   // 关联关系
   benefitConsumed BenefitConsumed[]
+  activityMembers ActivityMember[]
 }
 
 model BenefitType {
@@ -102,6 +103,7 @@ model BenefitGroup {
   notShow       Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  forWhom       String   @db.VarChar(20) @default("律师")
 
   // 关联关系
   benefitType BenefitType @relation(fields: [benefitTypeId], references: [id], onDelete: Restrict)
@@ -152,6 +154,46 @@ model Employee {
 
   // 关联关系
   role EmployeeRoles @relation(fields: [roleId], references: [id], onDelete: Restrict)
+}
+
+model Activity {
+  id              Int      @id @default(autoincrement())
+  title           String   @db.VarChar(200) // 活动名称
+  description     String?  @db.Text // 活动简介
+  startTime       DateTime // 开始时间
+  endTime         DateTime // 结束时间
+  location        String   @db.VarChar(200) // 活动地点
+  images          String?  @db.Text // JSON格式存储图片路径数组
+  imageTcpId      String?  @db.Text // JSON格式存储图片的TCP file_id数组
+  isPaid          Boolean  @default(false) // 是否收费
+  price           Decimal  @default(0) @db.Decimal(10, 2) // 价格
+  targetGroups    String   @db.Text // JSON格式存储目标群体ID数组，0表示全部
+  canUseBenefit   Boolean  @default(false) // 是否可以使用权益抵扣
+  minParticipants Int      @default(1) // 人数下限
+  maxParticipants Int      @default(100) // 人数上限
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 关联关系
+  activityMembers ActivityMember[]
+}
+
+model ActivityMember {
+  id          Int      @id @default(autoincrement())
+  activityId  Int      // 活动ID
+  memberId    Int      // 成员ID
+  memberName  String   @db.VarChar(100) // 成员姓名
+  memberPhone String   @db.VarChar(20) // 成员电话
+  isPaid      Boolean  @default(false) // 是否已缴费
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联关系
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  // 复合唯一约束：活动ID和成员ID的组合必须唯一
+  @@unique([activityId, memberId])
 }
 
 model MenuSetting {

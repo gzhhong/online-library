@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Activity` ADD COLUMN `maxParticipants` INTEGER NOT NULL DEFAULT 100,
+    ADD COLUMN `minParticipants` INTEGER NOT NULL DEFAULT 1;

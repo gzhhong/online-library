@@ -6,14 +6,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 获取所有权益分组的标题，按groupId分组，只返回不隐藏的组
+    // 获取所有权益分组的标题和适用对象，按groupId分组，只返回不隐藏的组
     const benefitGroups = await prisma.benefitGroup.findMany({
       where: {
         notShow: false // 只获取不隐藏的组
       },
       select: {
         groupId: true,
-        title: true
+        title: true,
+        forWhom: true
       },
       orderBy: [
         { groupId: 'asc' },
@@ -21,11 +22,14 @@ export default async function handler(req, res) {
       ]
     });
 
-    // 按groupId分组，去重标题
+    // 按groupId分组，去重标题和适用对象
     const groupedTitles = {};
     benefitGroups.forEach(group => {
       if (!groupedTitles[group.groupId]) {
-        groupedTitles[group.groupId] = group.title;
+        groupedTitles[group.groupId] = {
+          title: group.title,
+          forWhom: group.forWhom
+        };
       }
     });
 
