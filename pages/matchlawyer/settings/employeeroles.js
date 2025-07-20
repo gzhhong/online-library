@@ -154,13 +154,14 @@ export default function EmployeeRolesPage() {
     <MatchLawyerLayout>
       <Box sx={{ p: 3 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="h4">
+          <Typography variant="h4" data-testid="page-title">
             角色设置
           </Typography>
           <Button
             variant="contained"
             startIcon={<Add />}
             onClick={handleCreate}
+            data-testid="add-role-button"
           >
             新增角色
           </Button>
@@ -216,8 +217,9 @@ export default function EmployeeRolesPage() {
           onClose={() => setDialogOpen(false)}
           maxWidth="sm"
           fullWidth
+          data-testid="role-dialog"
         >
-          <DialogTitle>
+          <DialogTitle data-testid="dialog-title">
             {editingRole ? '编辑角色' : '新增角色'}
           </DialogTitle>
           <DialogContent>
@@ -229,6 +231,10 @@ export default function EmployeeRolesPage() {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="如：管理员、运维人员、普通用户"
                 margin="normal"
+                inputProps={{
+                  'data-testid': 'role-name-input',
+                  'aria-label': '角色名称输入框'
+                }}
               />
               <TextField
                 fullWidth
@@ -239,6 +245,10 @@ export default function EmployeeRolesPage() {
                 multiline
                 rows={3}
                 margin="normal"
+                inputProps={{
+                  'data-testid': 'role-description-input',
+                  'aria-label': '权限描述输入框'
+                }}
               />
             </Box>
           </DialogContent>
@@ -246,6 +256,7 @@ export default function EmployeeRolesPage() {
             <Button
               onClick={() => setDialogOpen(false)}
               disabled={saving}
+              data-testid="cancel-button"
             >
               取消
             </Button>
@@ -253,6 +264,7 @@ export default function EmployeeRolesPage() {
               onClick={handleSave}
               variant="contained"
               disabled={saving}
+              data-testid="save-button"
             >
               {saving ? <CircularProgress size={20} /> : '保存'}
             </Button>

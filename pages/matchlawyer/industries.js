@@ -419,7 +419,7 @@ export default function IndustriesPage() {
 
   // 初始化根节点
   const initializeRootNode = useCallback(async () => {
-    const rootExists = industries.some(item => item.id === '00000000000');
+    const rootExists = industries.some(item => item.id === '000000000000');
     if (!rootExists) {
       try {
         const response = await fetch('/api/matchlawyer/industries/create', {
@@ -430,7 +430,7 @@ export default function IndustriesPage() {
           body: JSON.stringify({
             title: '法学',
             description: '这是根节点，不能编辑',
-            parentId: '00000000000'
+            parentId: '000000000000'
           }),
         });
 

@@ -29,17 +29,17 @@ async function handler(req, res) {
 
     // 如果有父节点，获取父节点信息
     if (parentId && parentId !== 'null') {
-      // 特殊处理：如果parentId是00000000000，检查根节点是否存在，不存在则创建
-      if (parentId === '00000000000') {
+      // 特殊处理：如果parentId是000000000000，检查根节点是否存在，不存在则创建
+      if (parentId === '000000000000') {
         parent = await prisma.industry.findUnique({
-          where: { id: '00000000000' }
+          where: { id: '000000000000' }
         });
 
         if (!parent) {
           // 创建根节点
           parent = await prisma.industry.create({
             data: {
-              id: '00000000000',
+              id: '000000000000',
               title: '法学',
               description: '节点为根节点，不能编辑',
               level: 0,

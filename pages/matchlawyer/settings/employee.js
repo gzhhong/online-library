@@ -206,13 +206,14 @@ export default function EmployeePage() {
     <MatchLawyerLayout>
       <Box sx={{ p: 3 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="h4">
+          <Typography variant="h4" data-testid="page-title">
             员工管理
           </Typography>
           <Button
             variant="contained"
             startIcon={<Add />}
             onClick={handleCreate}
+            data-testid="add-employee-button"
           >
             新增员工
           </Button>
@@ -281,8 +282,9 @@ export default function EmployeePage() {
           onClose={() => setDialogOpen(false)}
           maxWidth="sm"
           fullWidth
+          data-testid="employee-dialog"
         >
-          <DialogTitle>
+          <DialogTitle data-testid="dialog-title">
             {editingEmployee ? '编辑员工' : '新增员工'}
           </DialogTitle>
           <DialogContent>
@@ -293,6 +295,10 @@ export default function EmployeePage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 margin="normal"
+                inputProps={{
+                  'data-testid': 'employee-name-input',
+                  'aria-label': '员工姓名输入框'
+                }}
               />
               <TextField
                 fullWidth
@@ -301,6 +307,10 @@ export default function EmployeePage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 margin="normal"
+                inputProps={{
+                  'data-testid': 'employee-email-input',
+                  'aria-label': '员工邮箱输入框'
+                }}
               />
               <TextField
                 fullWidth
@@ -308,6 +318,10 @@ export default function EmployeePage() {
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 margin="normal"
+                inputProps={{
+                  'data-testid': 'employee-phone-input',
+                  'aria-label': '员工手机号输入框'
+                }}
               />
               <TextField
                 fullWidth
@@ -316,6 +330,10 @@ export default function EmployeePage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 margin="normal"
+                inputProps={{
+                  'data-testid': 'employee-password-input',
+                  'aria-label': '员工密码输入框'
+                }}
               />
               <FormControl fullWidth margin="normal">
                 <InputLabel>角色</InputLabel>
@@ -323,6 +341,10 @@ export default function EmployeePage() {
                   value={formData.roleId}
                   onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
                   label="角色"
+                  inputProps={{
+                    'data-testid': 'employee-role-select',
+                    'aria-label': '员工角色选择框'
+                  }}
                 >
                   {roles.map((role) => (
                     <MenuItem key={role.id} value={role.id.toString()}>
@@ -350,6 +372,7 @@ export default function EmployeePage() {
             <Button
               onClick={() => setDialogOpen(false)}
               disabled={saving}
+              data-testid="cancel-button"
             >
               取消
             </Button>
@@ -357,6 +380,7 @@ export default function EmployeePage() {
               onClick={handleSave}
               variant="contained"
               disabled={saving}
+              data-testid="save-button"
             >
               {saving ? <CircularProgress size={20} /> : '保存'}
             </Button>

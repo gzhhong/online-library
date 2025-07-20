@@ -26,6 +26,8 @@ yarn-error.log*
 # Local env files
 .env*.local
 .env.local
+/playwright-report/
+/test-results/
 
 docker-compose.yml
 

@@ -47,7 +47,7 @@ export default function Login() {
                 <Typography variant="h5" component="h1" gutterBottom>
                     管理员登录
                 </Typography>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} data-testid="login-form">
                     <TextField
                         fullWidth
                         label="邮箱"
@@ -55,6 +55,10 @@ export default function Login() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
+                        inputProps={{
+                            'data-testid': 'email-input',
+                            'aria-label': '邮箱输入框'
+                        }}
                     />
                     <TextField
                         fullWidth
@@ -64,9 +68,13 @@ export default function Login() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={loading}
+                        inputProps={{
+                            'data-testid': 'password-input',
+                            'aria-label': '密码输入框'
+                        }}
                     />
                     {error && (
-                        <Alert severity="error" sx={{ mt: 2 }}>
+                        <Alert severity="error" sx={{ mt: 2 }} data-testid="error-message">
                             {error}
                         </Alert>
                     )}
@@ -76,6 +84,7 @@ export default function Login() {
                         type="submit"
                         sx={{ mt: 3 }}
                         disabled={loading}
+                        data-testid="login-button"
                     >
                         {loading ? '登录中...' : '登录'}
                     </Button>

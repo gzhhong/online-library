@@ -214,3 +214,149 @@ curl -b cookies.txt -X POST http://localhost:3000/api/matchlawyer/menusettings/i
 
 - 增加角色
 - 设置角色到权限控制页面的各个节点上。
+
+## 3. 自动化测试环境
+
+### 环境概述
+
+项目已建立完整的自动化测试环境，使用独立的测试数据库 `mockdb`，与开发环境完全隔离。
+
+### 环境配置
+
+#### 1. 创建测试数据库
+
+确保 Docker MySQL 服务正在运行，然后创建测试数据库：
+
+```bash
+# 检查MySQL容器状态
+docker ps | grep mysql
+
+# 创建测试数据库
+docker exec tests__-db-1 mysql -u root -pexample -e "CREATE DATABASE IF NOT EXISTS mockdb;"
+```
+
+#### 2. 创建测试环境配置文件
+
+从开发环境配置复制并修改：
+
+```bash
+# 复制开发环境配置
+cp .env.local .env.local.test
+
+# 修改数据库连接为测试数据库
+sed -i '' 's/library/mockdb/g' .env.local.test
+```
+
+测试环境配置文件 `.env.local.test` 内容：
+
+```bash
+# 测试环境配置
+DATABASE_URL="mysql://root:example@localhost:3306/mockdb"
+JWT_SECRET="e823fceb897788dde7dda7273a0f44037fe5e1f15cd28fac5b9683bbb021e4b8eb2767b56e273735286edb144bcdbfb0cfc81de2ac6a30c99a6626342430ceb1"
+ADMIN_EMAIL="admin@test.com"
+ADMIN_PASSWORD="abcd1234"
+CLOUD_ENV_ID="test-cloud-env-id"
+```
+
+### 测试命令
+
+#### 首次设置（按顺序执行）
+
+```bash
+# 1. 在测试数据库中创建表结构
+npm run test:setup
+
+# 2. 验证测试环境
+npm run test:verify
+
+# 3. 运行所有测试
+npm test
+```
+
+#### 日常测试命令
+
+```bash
+# 运行所有测试
+npm test
+
+# 监听模式运行测试（开发时推荐）
+npm run test:watch
+
+# 重置测试数据库（清空所有数据）
+npm run test:reset
+
+# 验证测试环境
+npm run test:verify
+```
+
+### 环境隔离
+
+- **开发环境**：使用 `library` 数据库
+- **测试环境**：使用 `mockdb` 数据库
+- 两个环境完全隔离，互不影响
+
+### 测试覆盖范围
+
+当前测试覆盖：
+
+- 搜索工具函数 (`lib/searchUtils.js`)
+- 管理员 API (`pages/api/admin/*`)
+- 客户端 API (`pages/api/client/*`)
+- 文件访问 API (`pages/api/files/*`)
+- 管理员页面 (`pages/admin/*`)
+
+### 测试环境验证
+
+`npm run test:verify` 会检查：
+
+- 数据库连接状态
+- 表结构完整性
+- 数据操作功能
+- 外键约束
+- 唯一约束
+
+### 注意事项
+
+1. **首次使用**：必须先运行 `npm run test:setup` 创建表结构
+2. **环境变量**：测试使用 `.env.local.test` 配置文件
+3. **数据隔离**：测试不会影响开发数据库
+4. **依赖安装**：确保已安装 `dotenv-cli` 依赖
+5. **Docker 服务**：确保 MySQL Docker 容器正在运行
+
+### 故障排除
+
+#### 常见问题
+
+1. **数据库连接失败**
+
+   ```bash
+   # 检查Docker容器状态
+   docker ps | grep mysql
+
+   # 重启MySQL容器
+   docker restart tests__-db-1
+   ```
+
+2. **表结构不存在**
+
+   ```bash
+   # 重新设置测试数据库
+   npm run test:setup
+   ```
+
+3. **环境变量问题**
+
+   ```bash
+   # 检查配置文件
+   cat .env.local.test
+
+   # 重新创建配置文件
+   cp .env.local .env.local.test
+   sed -i '' 's/library/mockdb/g' .env.local.test
+   ```
+
+4. **依赖缺失**
+   ```bash
+   # 安装测试依赖
+   npm install --save-dev dotenv-cli
+   ```

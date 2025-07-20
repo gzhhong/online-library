@@ -82,6 +82,7 @@ export default function Layout({ children, menuItems, title }) {
                                     button 
                                     onClick={() => handleMenuClick(item)}
                                     selected={router.pathname === item.path}
+                                    data-testid={`menu-item-${item.text}`}
                                 >
                                     <ListItemIcon>{item.icon}</ListItemIcon>
                                     <ListItemText primary={item.text} />
