@@ -317,6 +317,10 @@ export default function RegisterPage() {
                   value={formData.type}
                   onChange={(e) => setFormData({...formData, type: e.target.value})}
                   label="成员类型"
+                  inputProps={{
+                    'data-testid': 'member-type-select',
+                    'aria-label': '成员类型选择框'
+                  }}
                 >
                   <MenuItem value="企业">企业</MenuItem>
                   <MenuItem value="律师">律师</MenuItem>
@@ -332,6 +336,10 @@ export default function RegisterPage() {
                   onChange={(e) => setFormData({...formData, benefitGroup: e.target.value})}
                   label="权益类型"
                   disabled={benefitGroupsLoading}
+                  inputProps={{
+                    'data-testid': 'benefit-group-select',
+                    'aria-label': '权益类型选择框'
+                  }}
                 >
                   {benefitGroupsLoading ? (
                     <MenuItem disabled>加载中...</MenuItem>
@@ -353,6 +361,10 @@ export default function RegisterPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 required
+                inputProps={{
+                  'data-testid': 'member-name-input',
+                  'aria-label': '成员姓名输入框'
+                }}
               />
             </Grid>
 
@@ -363,6 +375,10 @@ export default function RegisterPage() {
                 value={formData.idNumber}
                 onChange={(e) => setFormData({...formData, idNumber: e.target.value})}
                 required
+                inputProps={{
+                  'data-testid': 'member-id-input',
+                  'aria-label': '成员证件号输入框'
+                }}
               />
             </Grid>
 
@@ -388,6 +404,10 @@ export default function RegisterPage() {
                 required
                 error={Boolean(formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))}
                 helperText={formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? '请输入正确的邮箱格式' : ''}
+                inputProps={{
+                  'data-testid': 'member-email-input',
+                  'aria-label': '成员邮箱输入框'
+                }}
               />
             </Grid>
 
@@ -400,6 +420,10 @@ export default function RegisterPage() {
                 required
                 error={Boolean(formData.phone && !/^1[3-9]\d{9}$/.test(formData.phone))}
                 helperText={formData.phone && !/^1[3-9]\d{9}$/.test(formData.phone) ? '请输入11位手机号码' : ''}
+                inputProps={{
+                  'data-testid': 'member-phone-input',
+                  'aria-label': '成员手机号输入框'
+                }}
               />
             </Grid>
 
@@ -517,6 +541,7 @@ export default function RegisterPage() {
                 fullWidth
                 size="large"
                 disabled={submitting}
+                data-testid="submit-register-button"
               >
                 {submitting ? <CircularProgress size={24} /> : '提交注册'}
               </Button>

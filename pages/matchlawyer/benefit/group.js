@@ -440,7 +440,7 @@ export default function BenefitGroupPage() {
   return (
     <MatchLawyerLayout>
       <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom data-testid="page-title">
           权益分组管理
         </Typography>
 
@@ -457,6 +457,10 @@ export default function BenefitGroupPage() {
                 value={newGroup.title}
                 onChange={(e) => updateNewGroup('title', e.target.value)}
                 placeholder="如：免费成员"
+                inputProps={{
+                  'data-testid': 'group-title-input',
+                  'aria-label': '权益组标题输入框'
+                }}
               />
             </Grid>
             <Grid item xs={12} md={2}>
@@ -466,6 +470,10 @@ export default function BenefitGroupPage() {
                   value={newGroup.forWhom}
                   onChange={(e) => updateNewGroup('forWhom', e.target.value)}
                   label="适用对象"
+                  inputProps={{
+                    'data-testid': 'group-forwhom-select',
+                    'aria-label': '适用对象选择框'
+                  }}
                 >
                   <MenuItem value="企业">企业</MenuItem>
                   <MenuItem value="律师">律师</MenuItem>
@@ -490,6 +498,7 @@ export default function BenefitGroupPage() {
                 disabled={!newGroup.title.trim()}
                 startIcon={<Add />}
                 fullWidth
+                data-testid="add-group-button"
               >
                 增加权益组
               </Button>
@@ -568,7 +577,7 @@ export default function BenefitGroupPage() {
                             </Grid>
                           </Grid>
                         ) : (
-                          <Typography variant="h6">
+                          <Typography variant="h6" data-testid="group-title-label">
                             {group.isTemp ? '[临时] ' : ''}权益组：{group.title} (适用：{group.forWhom || '未设置'}, 总价：¥{group.price || 0})
                           </Typography>
                         )}
@@ -591,6 +600,7 @@ export default function BenefitGroupPage() {
                             startIcon={<Delete />}
                             onClick={() => handleDeleteGroup(group.groupId, group.title)}
                             title="删除整个权益组"
+                            data-testid="delete-group-button"
                           >
                             删除组
                           </Button>
@@ -700,7 +710,7 @@ export default function BenefitGroupPage() {
                     ))}
 
                     {/* 为当前组添加权益项 */}
-                    <Box sx={{ mt: 2, p: 2, border: '1px dashed #ccc', borderRadius: 1 }}>
+                    <Box sx={{ mt: 2, p: 2, border: '1px dashed #ccc', borderRadius: 1 }} data-testid="add-benefit-item-section">
                       <Typography variant="subtitle2" gutterBottom>
                         {group.isTemp ? '为临时组添加权益项' : '为当前组添加权益项'}
                       </Typography>
@@ -712,6 +722,10 @@ export default function BenefitGroupPage() {
                               value={getGroupFormData(group.groupId).benefitTypeId}
                               onChange={(e) => updateGroupFormData(group.groupId, 'benefitTypeId', e.target.value)}
                               label="权益类型"
+                              inputProps={{
+                                'data-testid': 'benefit-type-select',
+                                'aria-label': '权益类型选择框'
+                              }}
                             >
                               {benefitTypes.map((type) => (
                                 <MenuItem key={type.id} value={type.id}>
@@ -729,7 +743,12 @@ export default function BenefitGroupPage() {
                             type="number"
                             value={getGroupFormData(group.groupId).times}
                             onChange={(e) => updateGroupFormData(group.groupId, 'times', parseInt(e.target.value) || 1)}
-                            inputProps={{ min: 1, max: 999 }}
+                            inputProps={{ 
+                              min: 1, 
+                              max: 999,
+                              'data-testid': 'benefit-times-input',
+                              'aria-label': '权益次数输入框'
+                            }}
                           />
                         </Grid>
                         <Grid item xs={12} md={2}>
@@ -740,7 +759,12 @@ export default function BenefitGroupPage() {
                             type="number"
                             value={getGroupFormData(group.groupId).price}
                             onChange={(e) => updateGroupFormData(group.groupId, 'price', parseFloat(e.target.value) || 0)}
-                            inputProps={{ min: 0, step: 0.01 }}
+                            inputProps={{ 
+                              min: 0, 
+                              step: 0.01,
+                              'data-testid': 'benefit-price-input',
+                              'aria-label': '权益价格输入框'
+                            }}
                           />
                         </Grid>
                         <Grid item xs={12} md={2}>
@@ -751,6 +775,7 @@ export default function BenefitGroupPage() {
                               onClick={() => handleAddItemToTempGroup(group.groupId)}
                               disabled={saving || !getGroupFormData(group.groupId).benefitTypeId}
                               startIcon={saving ? <CircularProgress size={16} /> : <Add />}
+                              data-testid="add-to-group-button"
                             >
                               添加到权益组
                             </Button>
@@ -761,6 +786,7 @@ export default function BenefitGroupPage() {
                               onClick={() => handleAddItem(group.groupId, group.title)}
                               disabled={saving || !getGroupFormData(group.groupId).benefitTypeId}
                               startIcon={saving ? <CircularProgress size={16} /> : <Add />}
+                              data-testid="add-benefit-item-button"
                             >
                               增加权益项
                             </Button>

@@ -88,6 +88,76 @@ async function addEmployees(roles) {
   return createdEmployees;
 }
 
+// 添加权益类型
+async function addBenefitTypes() {
+  console.log('🎁 创建权益类型...');
+  
+  const benefitTypes = [
+    { id: '000001', title: '会议', isPaid: true },
+    { id: '000002', title: '培训', isPaid: true },
+    { id: '000003', title: '会议', isPaid: false },
+    { id: '000004', title: '培训', isPaid: false }
+  ];
+  
+  const createdBenefitTypes = [];
+  for (const benefitType of benefitTypes) {
+    // 检查权益类型是否已存在
+    let existingBenefitType = await prisma.benefitType.findFirst({
+      where: { id: benefitType.id }
+    });
+    
+    if (existingBenefitType) {
+      console.log(`✅ 权益类型已存在: ${benefitType.title} (ID: ${benefitType.id})`);
+      createdBenefitTypes.push(existingBenefitType);
+    } else {
+      const createdBenefitType = await prisma.benefitType.create({
+        data: benefitType
+      });
+      createdBenefitTypes.push(createdBenefitType);
+      console.log(`✅ 创建权益类型: ${benefitType.title} (ID: ${benefitType.id}, 收费: ${benefitType.isPaid})`);
+    }
+  }
+  
+  return createdBenefitTypes;
+}
+
+// 添加权益分组数据
+async function addBenefitGroups() {
+  console.log('📦 创建权益分组...');
+  
+  const benefitGroups = [
+    { groupId: 'AAAAAA', title: '免费会员', benefitTypeId: '000003', times: 3, description: '免费会员 - 律师', price: 0, notShow: false, forWhom: '律师' },
+    { groupId: 'AAAAAA', title: '免费会员', benefitTypeId: '000004', times: 3, description: '免费会员 - 律师', price: 0, notShow: false, forWhom: '律师' },
+    { groupId: 'BBBBBB', title: '一星会员', benefitTypeId: '000001', times: 3, description: '一星会员 - 律师', price: 200, notShow: false, forWhom: '律师' },
+    { groupId: 'BBBBBB', title: '一星会员', benefitTypeId: '000002', times: 3, description: '一星会员 - 律师', price: 200, notShow: false, forWhom: '律师' },
+    { groupId: 'CCCCCC', title: '免费会员', benefitTypeId: '000003', times: 3, description: '免费会员-企业', price: 0, notShow: false, forWhom: '企业' }
+  ];
+  
+  const createdBenefitGroups = [];
+  for (const benefitGroup of benefitGroups) {
+    // 检查权益分组是否已存在（基于groupId和benefitTypeId的组合）
+    let existingBenefitGroup = await prisma.benefitGroup.findFirst({
+      where: { 
+        groupId: benefitGroup.groupId,
+        benefitTypeId: benefitGroup.benefitTypeId
+      }
+    });
+    
+    if (existingBenefitGroup) {
+      console.log(`✅ 权益分组已存在: ${benefitGroup.title} (GroupID: ${benefitGroup.groupId}, TypeID: ${benefitGroup.benefitTypeId})`);
+      createdBenefitGroups.push(existingBenefitGroup);
+    } else {
+      const createdBenefitGroup = await prisma.benefitGroup.create({
+        data: benefitGroup
+      });
+      createdBenefitGroups.push(createdBenefitGroup);
+      console.log(`✅ 创建权益分组: ${benefitGroup.title} (GroupID: ${benefitGroup.groupId}, TypeID: ${benefitGroup.benefitTypeId})`);
+    }
+  }
+  
+  return createdBenefitGroups;
+}
+
 // 添加默认菜单
 async function addDefaultMenus(roles) {
   console.log('📋 创建菜单设置...');
@@ -296,10 +366,9 @@ async function initPermissionData() {
     // 3. 创建员工
     const employees = await addEmployees(roles);
     
-    // 4. 创建菜单
     const menus = await addDefaultMenus(roles);
     
-    // 5. 验证数据
+    // 6. 验证数据
     console.log('🔍 验证数据...');
     const roleCount = await prisma.employeeRoles.count();
     const employeeCount = await prisma.employee.count();
@@ -346,14 +415,32 @@ async function getMenus() {
   return await prisma.menuSetting.findMany();
 }
 
+// 获取权益类型信息
+async function getBenefitTypes() {
+  return await prisma.benefitType.findMany();
+}
+
+// 获取权益分组信息
+async function getBenefitGroups() {
+  return await prisma.benefitGroup.findMany({
+    include: {
+      benefitType: true
+    }
+  });
+}
+
 module.exports = {
   addRoles,
   addEmployees,
+  addBenefitTypes,
+  addBenefitGroups,
   addDefaultMenus,
   clearPermissionData,
   initPermissionData,
   getRoles,
   getEmployees,
+  getBenefitTypes,
+  getBenefitGroups,
   getMenus,
   prisma
 }; 

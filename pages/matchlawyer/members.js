@@ -302,7 +302,7 @@ export default function MembersPage() {
 
         <Paper sx={{ mt: 2 }}>
           <TableContainer>
-            <Table>
+            <Table data-testid="members-table">
               <TableHead>
                 <TableRow>
                   <TableCell>名称</TableCell>
@@ -314,13 +314,13 @@ export default function MembersPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {members.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell>{member.name}</TableCell>
-                    <TableCell>{member.type}</TableCell>
-                    <TableCell>{getBenefitGroupDisplay(member.benefitGroup)}</TableCell>
-                    <TableCell>{getPaidStatusDisplay(member.isPaid, member.benefitGroup)}</TableCell>
-                    <TableCell>{getStatusDisplay(member.status)}</TableCell>
+                {members.map((member, index) => (
+                  <TableRow key={member.id} data-testid={`member-row-${index}`}>
+                    <TableCell data-testid={`member-name-${index}`}>{member.name}</TableCell>
+                    <TableCell data-testid={`member-type-${index}`}>{member.type}</TableCell>
+                    <TableCell data-testid={`member-benefit-${index}`}>{getBenefitGroupDisplay(member.benefitGroup)}</TableCell>
+                    <TableCell data-testid={`member-paid-${index}`}>{getPaidStatusDisplay(member.isPaid, member.benefitGroup)}</TableCell>
+                    <TableCell data-testid={`member-status-${index}`}>{getStatusDisplay(member.status)}</TableCell>
                     <TableCell>
                       <IconButton
                         onClick={() => handleViewMember(member.id)}
