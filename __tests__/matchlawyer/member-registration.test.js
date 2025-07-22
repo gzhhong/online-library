@@ -176,4 +176,102 @@ test.describe('MatchLawyer 会员注册', () => {
     // 验证被删除的权益组仍然显示在页面上（说明删除失败）
     await expect(targetGroup).toBeVisible();
   });
+  
+  test('5. 验证Member数据库内容与输入一致', async () => {
+    // 查询数据库中的成员信息
+    const members = await prisma.member.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    console.log('📊 Member数据库信息:');
+    console.log(`总共有 ${members.length} 个成员`);
+    
+    members.forEach((member, index) => {
+      console.log(`\n成员 ${index + 1}:`);
+      console.log(`  - ID: ${member.id}`);
+      console.log(`  - 姓名: ${member.name}`);
+      console.log(`  - 类型: ${member.type}`);
+      console.log(`  - 权益分组ID: ${member.benefitGroup}`);
+      console.log(`  - 邮箱: ${member.email}`);
+      console.log(`  - 手机号: ${member.phone}`);
+      console.log(`  - 证件号: ${member.idNumber}`);
+      console.log(`  - 工作单位: ${member.company || '无'}`);
+      console.log(`  - 状态: ${member.status}`);
+      console.log(`  - 是否付费: ${member.isPaid}`);
+      console.log(`  - 创建时间: ${member.createdAt}`);
+    });
+    
+    // 验证有两个成员
+    expect(members).toHaveLength(2);
+    
+    // 验证律师成员信息
+    const lawyerMember = members.find(m => m.name === '张三');
+    expect(lawyerMember).toBeDefined();
+    expect(lawyerMember.type).toBe('律师');
+    expect(lawyerMember.email).toBe('zhangsanlvshi@test.com');
+    expect(lawyerMember.phone).toBe('13900000000');
+    expect(lawyerMember.idNumber).toBe('823981928398');
+    expect(lawyerMember.status).toBe(0); // 待审核
+    expect(lawyerMember.isPaid).toBe(false);
+    
+    // 验证企业成员信息
+    const companyMember = members.find(m => m.name === '测试技术公司');
+    expect(companyMember).toBeDefined();
+    expect(companyMember.type).toBe('企业');
+    expect(companyMember.email).toBe('ceshiqiye@test.com');
+    expect(companyMember.phone).toBe('15900000000');
+    expect(companyMember.idNumber).toBe('923892839');
+    expect(companyMember.status).toBe(0); // 待审核
+    expect(companyMember.isPaid).toBe(false);
+    
+    // 验证权益分组ID是否正确存储（应该是groupId而不是title）
+    // 查询BenefitGroup表获取groupId和title的对应关系
+    const benefitGroups = await prisma.benefitGroup.findMany({
+      select: {
+        groupId: true,
+        title: true,
+        forWhom: true
+      },
+      orderBy: [
+        { groupId: 'asc' },
+        { createdAt: 'asc' }
+      ]
+    });
+    
+    // 按groupId分组，去重
+    const groupedGroups = {};
+    benefitGroups.forEach(group => {
+      if (!groupedGroups[group.groupId]) {
+        groupedGroups[group.groupId] = {
+          groupId: group.groupId,
+          title: group.title,
+          forWhom: group.forWhom
+        };
+      }
+    });
+    
+    console.log('\n📋 BenefitGroup信息:');
+    Object.values(groupedGroups).forEach((group, index) => {
+      console.log(`  ${index + 1}. groupId: ${group.groupId}, title: ${group.title}, forWhom: ${group.forWhom}`);
+    });
+    
+    // 验证律师成员的权益分组ID
+    const lawyerGroup = Object.values(groupedGroups).find(g => g.title === '一星会员' && g.forWhom === '律师');
+    expect(lawyerGroup).toBeDefined();
+    expect(lawyerMember.benefitGroup).toBe(lawyerGroup.groupId);
+    console.log(`\n✅ 律师成员权益分组验证: 存储的ID=${lawyerMember.benefitGroup}, 期望的ID=${lawyerGroup.groupId}`);
+    
+    // 验证企业成员的权益分组ID
+    const companyGroup = Object.values(groupedGroups).find(g => g.title === '免费会员' && g.forWhom === '企业');
+    expect(companyGroup).toBeDefined();
+    expect(companyMember.benefitGroup).toBe(companyGroup.groupId);
+    console.log(`✅ 企业成员权益分组验证: 存储的ID=${companyMember.benefitGroup}, 期望的ID=${companyGroup.groupId}`);
+    
+    // 验证存储的不是title而是groupId
+    expect(lawyerMember.benefitGroup).not.toBe('一星会员');
+    expect(companyMember.benefitGroup).not.toBe('免费会员');
+    console.log('\n✅ 验证通过: Member表中存储的是groupId而不是title');
+  });
 }); 

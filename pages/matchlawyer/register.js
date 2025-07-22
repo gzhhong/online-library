@@ -64,7 +64,7 @@ export default function RegisterPage() {
   // 设置默认权益类型
   useEffect(() => {
     if (filteredBenefitGroups.length > 0 && !formData.benefitGroup) {
-      setFormData(prev => ({ ...prev, benefitGroup: filteredBenefitGroups[0].title }));
+      setFormData(prev => ({ ...prev, benefitGroup: filteredBenefitGroups[0].groupId }));
     }
   }, [filteredBenefitGroups, formData.benefitGroup]);
 
@@ -345,7 +345,7 @@ export default function RegisterPage() {
                     <MenuItem disabled>加载中...</MenuItem>
                   ) : (
                     filteredBenefitGroups.map((group, index) => (
-                      <MenuItem key={index} value={group.title}>
+                      <MenuItem key={index} value={group.groupId}>
                         {group.title}
                       </MenuItem>
                     ))

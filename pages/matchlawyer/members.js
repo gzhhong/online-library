@@ -258,18 +258,22 @@ export default function MembersPage() {
 
   // 获取权益类型显示
   const getBenefitGroupDisplay = (benefitGroup) => {
+    // 根据groupId查找对应的权益分组
+    const group = benefitGroups.find(g => g.groupId === benefitGroup);
+    const displayText = group ? group.title : benefitGroup;
+    
     // 动态颜色映射，基于权益类型在列表中的位置
     const colors = ['default', 'primary', 'secondary', 'error', 'warning', 'info'];
-    const index = benefitGroups.indexOf(benefitGroup);
+    const index = benefitGroups.findIndex(g => g.groupId === benefitGroup);
     const color = colors[index % colors.length] || 'default';
-    return <Chip label={benefitGroup} color={color} size="small" />;
+    return <Chip label={displayText} color={color} size="small" />;
   };
 
   // 获取付费状态显示
   const getPaidStatusDisplay = (isPaid, benefitGroup) => {
-    // 这里需要根据实际的权益类型来判断是否为免费类型
-    // 暂时保持原有逻辑，后续可以根据BenefitGroup的price字段来判断
-    if (benefitGroup && benefitGroup.includes('免费')) return null;
+    // 根据groupId查找对应的权益分组
+    const group = benefitGroups.find(g => g.groupId === benefitGroup);
+    if (group && group.title.includes('免费')) return null;
     return isPaid ? (
       <Chip label="已付费" color="success" size="small" />
     ) : (
@@ -408,7 +412,7 @@ export default function MembersPage() {
                             <MenuItem disabled>加载中...</MenuItem>
                           ) : (
                             filteredBenefitGroups.map((group, index) => (
-                              <MenuItem key={index} value={group.title}>
+                              <MenuItem key={index} value={group.groupId}>
                                 {group.title}
                               </MenuItem>
                             ))
@@ -441,7 +445,10 @@ export default function MembersPage() {
                       disabled={!editMode}
                       margin="normal"
                     />
-                    {selectedMember.benefitGroup && !selectedMember.benefitGroup.includes('免费') && (
+                    {selectedMember.benefitGroup && (() => {
+                      const group = benefitGroups.find(g => g.groupId === selectedMember.benefitGroup);
+                      return group && !group.title.includes('免费');
+                    })() && (
                       <FormControlLabel
                         control={
                           <Switch
