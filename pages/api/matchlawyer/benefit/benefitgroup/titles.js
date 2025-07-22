@@ -27,6 +27,7 @@ export default async function handler(req, res) {
     benefitGroups.forEach(group => {
       if (!groupedTitles[group.groupId]) {
         groupedTitles[group.groupId] = {
+          groupId: group.groupId,
           title: group.title,
           forWhom: group.forWhom
         };

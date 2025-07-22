@@ -41,6 +41,7 @@ export default function ActivitiesPage() {
   const [editMode, setEditMode] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [benefitGroups, setBenefitGroups] = useState([]);
+  const [benefitTypes, setBenefitTypes] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
@@ -74,10 +75,11 @@ export default function ActivitiesPage() {
       const response = await fetch('/api/matchlawyer/benefit/benefitgroup/titles');
       if (response.ok) {
         const result = await response.json();
-        // 将字符串数组转换为对象数组，使用索引作为id
-        const groupsWithIds = result.data.map((title, index) => ({
-          id: index + 1, // 从1开始，因为0表示"全部"
-          title: title
+        // 使用groupId作为ID
+        const groupsWithIds = result.data.map((group) => ({
+          id: group.groupId, // 使用groupId作为ID
+          title: group.title,
+          forWhom: group.forWhom
         }));
         setBenefitGroups(groupsWithIds);
       }
@@ -86,9 +88,23 @@ export default function ActivitiesPage() {
     }
   };
 
+  // 加载权益类型
+  const loadBenefitTypes = async () => {
+    try {
+      const response = await fetch('/api/matchlawyer/benefit/benefittype/list');
+      if (response.ok) {
+        const result = await response.json();
+        setBenefitTypes(result.data);
+      }
+    } catch (error) {
+      console.error('加载权益类型失败:', error);
+    }
+  };
+
   useEffect(() => {
     loadActivities();
     loadBenefitGroups();
+    loadBenefitTypes();
   }, []);
 
   // 处理文件选择
@@ -130,7 +146,7 @@ export default function ActivitiesPage() {
       startTime: '',
       endTime: '',
       location: '',
-      isPaid: false,
+      benefitTypeId: '', // 默认不选择权益类型（免费活动）
       price: 0,
       targetGroups: [0], // 默认全部
       canUseBenefit: false,
@@ -359,13 +375,14 @@ export default function ActivitiesPage() {
     <MatchLawyerLayout>
       <Box sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4">
+          <Typography variant="h4" data-testid="page-title">
             活动管理
           </Typography>
           <Button
             variant="contained"
             startIcon={<Add />}
             onClick={handleAddActivity}
+            data-testid="add-activity-button"
           >
             添加活动
           </Button>
@@ -398,8 +415,17 @@ export default function ActivitiesPage() {
                     </TableCell>
                     <TableCell>{activity.location}</TableCell>
                     <TableCell>
-                      {activity.isPaid ? (
-                        <Chip label={`¥${activity.price}`} color="primary" size="small" />
+                      {activity.benefitTypeId ? (
+                        <Box>
+                          <Chip 
+                            label={`¥${activity.price}`} 
+                            color={activity.benefitTypeIsPaid ? "primary" : "success"} 
+                            size="small" 
+                          />
+                          <Typography variant="caption" display="block" color="text.secondary">
+                            {activity.benefitTypeTitle}
+                          </Typography>
+                        </Box>
                       ) : (
                         <Chip label="免费" color="success" size="small" />
                       )}
@@ -414,7 +440,7 @@ export default function ActivitiesPage() {
                             return (
                               <Chip 
                                 key={groupId} 
-                                label={group ? group.title : `分组${groupId}`} 
+                                label={group ? group.forWhom + ' ' + group.title : `分组${groupId}`} 
                                 color="info" 
                                 size="small" 
                               />
@@ -470,6 +496,9 @@ export default function ActivitiesPage() {
                         title: e.target.value
                       })}
                       required
+                      inputProps={{
+                        'data-testid': 'activity-title-input'
+                      }}
                     />
                   </Grid>
 
@@ -484,6 +513,9 @@ export default function ActivitiesPage() {
                         ...selectedActivity,
                         description: e.target.value
                       })}
+                      inputProps={{
+                        'data-testid': 'activity-description-input'
+                      }}
                     />
                   </Grid>
 
@@ -499,6 +531,9 @@ export default function ActivitiesPage() {
                       })}
                       required
                       InputLabelProps={{ shrink: true }}
+                      inputProps={{
+                        'data-testid': 'activity-start-time-input'
+                      }}
                     />
                   </Grid>
 
@@ -514,6 +549,9 @@ export default function ActivitiesPage() {
                       })}
                       required
                       InputLabelProps={{ shrink: true }}
+                      inputProps={{
+                        'data-testid': 'activity-end-time-input'
+                      }}
                     />
                   </Grid>
 
@@ -527,25 +565,40 @@ export default function ActivitiesPage() {
                         location: e.target.value
                       })}
                       required
+                      inputProps={{
+                        'data-testid': 'activity-location-input'
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={12} md={6}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={selectedActivity.isPaid}
-                          onChange={(e) => setSelectedActivity({
-                            ...selectedActivity,
-                            isPaid: e.target.checked
-                          })}
-                        />
-                      }
-                      label="是否收费"
-                    />
+                    <FormControl fullWidth>
+                      <InputLabel>权益类型</InputLabel>
+                      <Select
+                        value={selectedActivity.benefitTypeId || ''}
+                        onChange={(e) => setSelectedActivity({
+                          ...selectedActivity,
+                          benefitTypeId: e.target.value || null
+                        })}
+                        label="权益类型"
+                        inputProps={{
+                          'data-testid': 'activity-benefit-type-select',
+                          'aria-label': '权益类型选择框'
+                        }}
+                      >
+                        {benefitTypes.map((type) => (
+                          <MenuItem key={type.id} value={type.id}>
+                            {type.title} {type.isPaid ? '(收费)' : '(免费)'}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Grid>
 
-                  {selectedActivity.isPaid && (
+                  {(() => {
+                    const selectedBenefitType = benefitTypes.find(type => type.id === selectedActivity.benefitTypeId);
+                    return selectedBenefitType && selectedBenefitType.isPaid;
+                  })() && (
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
@@ -558,6 +611,9 @@ export default function ActivitiesPage() {
                         })}
                         InputProps={{
                           startAdornment: <span>¥</span>
+                        }}
+                        inputProps={{
+                          'data-testid': 'activity-price-input'
                         }}
                       />
                     </Grid>
@@ -574,6 +630,10 @@ export default function ActivitiesPage() {
                           targetGroups: e.target.value
                         })}
                         label="目标群体"
+                        inputProps={{
+                          'data-testid': 'activity-target-groups-select',
+                          'aria-label': '目标群体选择框'
+                        }}
                         renderValue={(selected) => (
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             {selected.map((value) => {
@@ -582,7 +642,7 @@ export default function ActivitiesPage() {
                               }
                               const group = benefitGroups.find(g => g.id === value);
                               return (
-                                <Chip key={value} label={group ? group.title : `分组${value}`} size="small" />
+                                <Chip key={value} label={group ? group.forWhom + ' ' + group.title: `分组${value}`} size="small" />
                               );
                             })}
                           </Box>
@@ -593,7 +653,7 @@ export default function ActivitiesPage() {
                         </MenuItem>
                         {benefitGroups.map((group) => (
                           <MenuItem key={group.id} value={group.id}>
-                            {group.title}
+                            { group.forWhom + ' ' + group.title }
                           </MenuItem>
                         ))}
                       </Select>
@@ -738,6 +798,7 @@ export default function ActivitiesPage() {
               onClick={handleSaveActivity}
               variant="contained"
               disabled={submitting}
+              data-testid="save-activity-button"
             >
               {submitting ? <CircularProgress size={20} /> : '保存'}
             </Button>

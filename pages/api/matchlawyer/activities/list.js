@@ -8,6 +8,9 @@ async function handler(req, res) {
 
   try {
     const activities = await prisma.activity.findMany({
+      include: {
+        benefitType: true
+      },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -21,7 +24,9 @@ async function handler(req, res) {
       location: activity.location,
       images: activity.images ? JSON.parse(activity.images) : [],
       imageTcpId: activity.imageTcpId ? JSON.parse(activity.imageTcpId) : [],
-      isPaid: activity.isPaid,
+      benefitTypeId: activity.benefitTypeId,
+      benefitTypeTitle: activity.benefitType?.title || null,
+      benefitTypeIsPaid: activity.benefitType?.isPaid || false,
       price: activity.price,
       targetGroups: activity.targetGroups ? JSON.parse(activity.targetGroups) : [],
       canUseBenefit: activity.canUseBenefit,

@@ -125,6 +125,9 @@ async function addBenefitTypes() {
 async function addBenefitGroups() {
   console.log('📦 创建权益分组...');
   
+  // 先创建权益类型
+  await addBenefitTypes();
+  
   const benefitGroups = [
     { groupId: 'AAAAAA', title: '免费会员', benefitTypeId: '000003', times: 3, description: '免费会员 - 律师', price: 0, notShow: false, forWhom: '律师' },
     { groupId: 'AAAAAA', title: '免费会员', benefitTypeId: '000004', times: 3, description: '免费会员 - 律师', price: 0, notShow: false, forWhom: '律师' },
